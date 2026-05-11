@@ -128,7 +128,7 @@ function Expenses() {
               <SelectContent>{CATS.map((c) => <SelectItem key={c.v} value={c.v}>{c.l}</SelectItem>)}</SelectContent>
             </Select>
           </div>
-          <div><Label className="text-xs">Vendor</Label><Input value={f.vendor} onChange={(e) => setF({ ...f, vendor: e.target.value })} /></div>
+          <div><Label className="text-xs">Paid To</Label><Input value={f.vendor} onChange={(e) => setF({ ...f, vendor: e.target.value })} /></div>
           <Button onClick={save} className="w-full">Save</Button>
         </div>
       )}
