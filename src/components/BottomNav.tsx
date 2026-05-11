@@ -13,7 +13,10 @@ const items: { to: string; label: string; icon: typeof LayoutDashboard; exact?: 
 export function BottomNav() {
   const { pathname } = useLocation();
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur border-t border-border safe-bottom">
+    <nav
+      data-bottom-nav
+      className="fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur border-t border-border safe-bottom safe-left safe-right transition-transform duration-200"
+    >
       <ul className="grid grid-cols-5 max-w-lg mx-auto">
         {items.map((it) => {
           const active = it.exact ? pathname === it.to : pathname.startsWith(it.to);
@@ -23,7 +26,7 @@ export function BottomNav() {
               <Link
                 to={it.to}
                 className={cn(
-                  "flex flex-col items-center gap-0.5 py-2.5 text-[10px] font-medium tracking-wide transition-colors",
+                  "flex flex-col items-center justify-center gap-0.5 px-1 py-2 min-h-[56px] text-[10px] font-medium tracking-wide transition-colors",
                   active ? "text-primary" : "text-muted-foreground hover:text-foreground"
                 )}
               >
