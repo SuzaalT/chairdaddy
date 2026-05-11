@@ -97,6 +97,7 @@ function NewChair() {
         work_done: f.work_done || null,
         trip_start: f.trip_start || null, trip_end: f.trip_end || null,
         trip_km: f.trip_km ? num(f.trip_km) : null,
+        trip_estimated_km: f.trip_estimated_km ? num(f.trip_estimated_km) : null,
         trip_round_trip: f.trip_round_trip,
         proof_purchase_url: proofUrl,
         receipt_urls: receiptUrls.length ? receiptUrls : null,
@@ -109,7 +110,9 @@ function NewChair() {
         await supabase.from("trips").insert({
           team_id: team.id, created_by: user.id, trip_date: f.date_acquired,
           start_location: f.trip_start, end_location: f.trip_end,
-          km: num(f.trip_km), round_trip: f.trip_round_trip,
+          km: num(f.trip_km),
+          estimated_km: f.trip_estimated_km ? num(f.trip_estimated_km) : null,
+          round_trip: f.trip_round_trip,
           purpose: `Pickup ${sku} (${f.brand})`, chair_id: chair.id,
         });
       }
