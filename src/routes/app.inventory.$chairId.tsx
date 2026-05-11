@@ -5,6 +5,11 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { cad, daysBetween, landedCost, profit, STALE_DAYS } from "@/lib/cra";
 import { ChevronLeft } from "lucide-react";
 
+const SOURCE_LABELS: Record<string, string> = {
+  fb_marketplace: "Facebook Marketplace", kijiji: "Kijiji",
+  estate_sale: "Estate Sale / Garage Sale", supplier: "Supplier / Wholesale", other: "Other (eBay, etc.)",
+};
+
 export const Route = createFileRoute("/app/inventory/$chairId")({ component: ChairDetail });
 
 function ChairDetail() {
