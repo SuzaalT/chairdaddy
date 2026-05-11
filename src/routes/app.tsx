@@ -1,0 +1,50 @@
+import { createFileRoute, Outlet, Navigate, Link } from "@tanstack/react-router";
+import { useAuth } from "@/hooks/use-auth";
+import { useTeam } from "@/hooks/use-team";
+import { BottomNav } from "@/components/BottomNav";
+import { Settings, Users } from "lucide-react";
+
+export const Route = createFileRoute("/app")({ component: AppLayout });
+
+function AppLayout() {
+  const { user, loading } = useAuth();
+  const { team, profile, loading: tloading } = useTeam();
+
+  if (loading || tloading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+      </div>
+    );
+  }
+  if (!user) return <Navigate to="/login" />;
+  if (!team) return <Navigate to="/onboarding" />;
+
+  const initials = (profile?.full_name || profile?.email || "?")
+    .split(" ").map((s) => s[0]).join("").slice(0, 2).toUpperCase();
+
+  return (
+    <div className="min-h-screen bg-background pb-[80px]">
+      <header className="sticky top-0 z-30 bg-background/85 backdrop-blur border-b border-border safe-top">
+        <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
+          <Link to="/app" className="font-bold tracking-tight text-base">ChairFlip <span className="text-muted-foreground font-normal">· {team.name}</span></Link>
+          <div className="flex items-center gap-1">
+            <Link to="/app/team" className="h-9 w-9 grid place-items-center rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" aria-label="Team">
+              <Users className="h-5 w-5" />
+            </Link>
+            <Link to="/app/settings" className="h-9 w-9 grid place-items-center rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" aria-label="Settings">
+              <Settings className="h-5 w-5" />
+            </Link>
+            <Link to="/app/team" className="ml-1 h-8 w-8 rounded-full bg-accent text-accent-foreground grid place-items-center text-xs font-semibold">
+              {initials}
+            </Link>
+          </div>
+        </div>
+      </header>
+      <main className="max-w-lg mx-auto">
+        <Outlet />
+      </main>
+      <BottomNav />
+    </div>
+  );
+}

@@ -9,38 +9,208 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppTeamRouteImport } from './routes/app.team'
+import { Route as AppSettingsRouteImport } from './routes/app.settings'
+import { Route as AppLogbookRouteImport } from './routes/app.logbook'
+import { Route as AppListingAiRouteImport } from './routes/app.listing-ai'
+import { Route as AppInventoryRouteImport } from './routes/app.inventory'
+import { Route as AppExpensesRouteImport } from './routes/app.expenses'
+import { Route as AppInventoryChairIdRouteImport } from './routes/app.inventory.$chairId'
+import { Route as AppChairNewRouteImport } from './routes/app.chair.new'
 
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppIndexRoute = AppIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTeamRoute = AppTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLogbookRoute = AppLogbookRouteImport.update({
+  id: '/logbook',
+  path: '/logbook',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppListingAiRoute = AppListingAiRouteImport.update({
+  id: '/listing-ai',
+  path: '/listing-ai',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInventoryRoute = AppInventoryRouteImport.update({
+  id: '/inventory',
+  path: '/inventory',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppExpensesRoute = AppExpensesRouteImport.update({
+  id: '/expenses',
+  path: '/expenses',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInventoryChairIdRoute = AppInventoryChairIdRouteImport.update({
+  id: '/$chairId',
+  path: '/$chairId',
+  getParentRoute: () => AppInventoryRoute,
+} as any)
+const AppChairNewRoute = AppChairNewRouteImport.update({
+  id: '/chair/new',
+  path: '/chair/new',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
+  '/app/expenses': typeof AppExpensesRoute
+  '/app/inventory': typeof AppInventoryRouteWithChildren
+  '/app/listing-ai': typeof AppListingAiRoute
+  '/app/logbook': typeof AppLogbookRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/team': typeof AppTeamRoute
+  '/app/': typeof AppIndexRoute
+  '/app/chair/new': typeof AppChairNewRoute
+  '/app/inventory/$chairId': typeof AppInventoryChairIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
+  '/app/expenses': typeof AppExpensesRoute
+  '/app/inventory': typeof AppInventoryRouteWithChildren
+  '/app/listing-ai': typeof AppListingAiRoute
+  '/app/logbook': typeof AppLogbookRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/team': typeof AppTeamRoute
+  '/app': typeof AppIndexRoute
+  '/app/chair/new': typeof AppChairNewRoute
+  '/app/inventory/$chairId': typeof AppInventoryChairIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/app': typeof AppRouteWithChildren
+  '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
+  '/app/expenses': typeof AppExpensesRoute
+  '/app/inventory': typeof AppInventoryRouteWithChildren
+  '/app/listing-ai': typeof AppListingAiRoute
+  '/app/logbook': typeof AppLogbookRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/team': typeof AppTeamRoute
+  '/app/': typeof AppIndexRoute
+  '/app/chair/new': typeof AppChairNewRoute
+  '/app/inventory/$chairId': typeof AppInventoryChairIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/app'
+    | '/login'
+    | '/onboarding'
+    | '/app/expenses'
+    | '/app/inventory'
+    | '/app/listing-ai'
+    | '/app/logbook'
+    | '/app/settings'
+    | '/app/team'
+    | '/app/'
+    | '/app/chair/new'
+    | '/app/inventory/$chairId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/login'
+    | '/onboarding'
+    | '/app/expenses'
+    | '/app/inventory'
+    | '/app/listing-ai'
+    | '/app/logbook'
+    | '/app/settings'
+    | '/app/team'
+    | '/app'
+    | '/app/chair/new'
+    | '/app/inventory/$chairId'
+  id:
+    | '__root__'
+    | '/'
+    | '/app'
+    | '/login'
+    | '/onboarding'
+    | '/app/expenses'
+    | '/app/inventory'
+    | '/app/listing-ai'
+    | '/app/logbook'
+    | '/app/settings'
+    | '/app/team'
+    | '/app/'
+    | '/app/chair/new'
+    | '/app/inventory/$chairId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  OnboardingRoute: typeof OnboardingRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +218,114 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/': {
+      id: '/app/'
+      path: '/'
+      fullPath: '/app/'
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/team': {
+      id: '/app/team'
+      path: '/team'
+      fullPath: '/app/team'
+      preLoaderRoute: typeof AppTeamRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/settings': {
+      id: '/app/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/logbook': {
+      id: '/app/logbook'
+      path: '/logbook'
+      fullPath: '/app/logbook'
+      preLoaderRoute: typeof AppLogbookRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/listing-ai': {
+      id: '/app/listing-ai'
+      path: '/listing-ai'
+      fullPath: '/app/listing-ai'
+      preLoaderRoute: typeof AppListingAiRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/inventory': {
+      id: '/app/inventory'
+      path: '/inventory'
+      fullPath: '/app/inventory'
+      preLoaderRoute: typeof AppInventoryRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/expenses': {
+      id: '/app/expenses'
+      path: '/expenses'
+      fullPath: '/app/expenses'
+      preLoaderRoute: typeof AppExpensesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/inventory/$chairId': {
+      id: '/app/inventory/$chairId'
+      path: '/$chairId'
+      fullPath: '/app/inventory/$chairId'
+      preLoaderRoute: typeof AppInventoryChairIdRouteImport
+      parentRoute: typeof AppInventoryRoute
+    }
+    '/app/chair/new': {
+      id: '/app/chair/new'
+      path: '/chair/new'
+      fullPath: '/app/chair/new'
+      preLoaderRoute: typeof AppChairNewRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppInventoryRouteChildren {
+  AppInventoryChairIdRoute: typeof AppInventoryChairIdRoute
+}
+
+const AppInventoryRouteChildren: AppInventoryRouteChildren = {
+  AppInventoryChairIdRoute: AppInventoryChairIdRoute,
+}
+
+const AppInventoryRouteWithChildren = AppInventoryRoute._addFileChildren(
+  AppInventoryRouteChildren,
+)
+
+interface AppRouteChildren {
+  AppExpensesRoute: typeof AppExpensesRoute
+  AppInventoryRoute: typeof AppInventoryRouteWithChildren
+  AppListingAiRoute: typeof AppListingAiRoute
+  AppLogbookRoute: typeof AppLogbookRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppTeamRoute: typeof AppTeamRoute
+  AppIndexRoute: typeof AppIndexRoute
+  AppChairNewRoute: typeof AppChairNewRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppExpensesRoute: AppExpensesRoute,
+  AppInventoryRoute: AppInventoryRouteWithChildren,
+  AppListingAiRoute: AppListingAiRoute,
+  AppLogbookRoute: AppLogbookRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppTeamRoute: AppTeamRoute,
+  AppIndexRoute: AppIndexRoute,
+  AppChairNewRoute: AppChairNewRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
+  LoginRoute: LoginRoute,
+  OnboardingRoute: OnboardingRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
