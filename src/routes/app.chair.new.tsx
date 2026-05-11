@@ -12,7 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { ChevronLeft, Save } from "lucide-react";
+import { ChevronLeft, Save, MapPin, AlertTriangle } from "lucide-react";
+import { estimateDrivingKm, variancePct, VARIANCE_FLAG_PCT } from "@/lib/distance";
 
 export const Route = createFileRoute("/app/chair/new")({ component: NewChair });
 
