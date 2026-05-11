@@ -48,7 +48,7 @@ function Onboarding() {
     <div className="min-h-screen flex items-center justify-center px-6 py-10 bg-background">
       <div className="w-full max-w-md">
         <h1 className="text-2xl font-semibold">Set up your team</h1>
-        <p className="text-sm text-muted-foreground mt-1">All your inventory and finances live in a team. Create one or join an existing one.</p>
+        <p className="text-sm text-muted-foreground mt-1">All your flips, expenses and mileage live in one workspace. Create yours or join your partner's.</p>
 
         <div className="mt-6 grid grid-cols-2 gap-2 p-1 bg-muted rounded-xl">
           <button onClick={() => setTab("create")} className={"py-2 rounded-lg text-sm font-medium " + (tab === "create" ? "bg-card shadow" : "text-muted-foreground")}>Create</button>
