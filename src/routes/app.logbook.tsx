@@ -33,7 +33,7 @@ const MAINT_CATS = [
 ] as const;
 
 const FUEL_SET = new Set<string>(FUEL_CATS);
-const MAINT_SET = new Set(MAINT_CATS.map((c) => c.v));
+const MAINT_SET = new Set<string>(MAINT_CATS.map((c) => c.v));
 
 function Logbook() {
   const { team } = useTeam();
