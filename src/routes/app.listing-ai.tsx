@@ -15,6 +15,7 @@ export const Route = createFileRoute("/app/listing-ai")({ component: ListingAI }
 function ListingAI() {
   const { profile } = useTeam();
   const [f, setF] = useState({ brand: "", model: "", condition: "Excellent", features: "", price: "", area: "", defects: "" });
+  const [style, setStyle] = useState<"fb" | "kijiji">("fb");
   const [out, setOut] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -23,10 +24,14 @@ function ListingAI() {
     if (!f.brand) return toast.error("Brand required");
     setBusy(true);
     try {
+      const system = style === "fb"
+        ? "You write concise, persuasive Facebook Marketplace listings for office chairs in Ontario, Canada. Casual, friendly, conversational tone — like talking to a neighbour. 2-3 sentence description followed by bullet point features. CAD pricing. No hashtags."
+        : "You write Kijiji listings for office chairs in Ontario, Canada. Slightly more formal and detail-oriented than Facebook — buyers on Kijiji expect specs, dimensions, and condition notes upfront. 2-3 sentence description, then a clear specs/features list. CAD pricing. No hashtags.";
+      const platform = style === "fb" ? "FB Marketplace" : "Kijiji";
       const text = await callAnthropic({
         apiKey: profile.anthropic_key,
-        system: "You write concise, persuasive Facebook Marketplace listings for office chairs in Ontario, Canada. 2-3 sentence description followed by bullet point features. CAD pricing. No hashtags. Friendly, professional tone.",
-        messages: [{ role: "user", content: `Brand: ${f.brand}\nModel: ${f.model}\nCondition: ${f.condition}\nFeatures: ${f.features}\nAsking price: $${f.price} CAD\nPickup area: ${f.area}\nDefects/notes: ${f.defects}\n\nWrite the FB Marketplace listing now.` }],
+        system,
+        messages: [{ role: "user", content: `Brand: ${f.brand}\nModel: ${f.model}\nCondition: ${f.condition}\nFeatures: ${f.features}\nAsking price: $${f.price} CAD\nPickup area: ${f.area}\nDefects/notes: ${f.defects}\n\nWrite the ${platform} listing now.` }],
       });
       setOut(text);
     } catch (e) {
@@ -45,7 +50,12 @@ function ListingAI() {
         <h1 className="text-2xl font-bold tracking-tight">Listing AI</h1>
         <Sparkles className="h-5 w-5 text-primary" />
       </div>
-      <p className="text-sm text-muted-foreground mb-4">Generate a polished FB Marketplace listing in seconds.</p>
+      <p className="text-sm text-muted-foreground mb-4">Generate a ready-to-post Facebook Marketplace or Kijiji listing in seconds.</p>
+
+      <div className="grid grid-cols-2 gap-2 p-1 bg-muted rounded-xl mb-4">
+        <button onClick={() => setStyle("fb")} className={"py-2 rounded-lg text-sm font-medium transition-colors " + (style === "fb" ? "bg-card shadow text-foreground" : "text-muted-foreground")}>Facebook Marketplace</button>
+        <button onClick={() => setStyle("kijiji")} className={"py-2 rounded-lg text-sm font-medium transition-colors " + (style === "kijiji" ? "bg-card shadow text-foreground" : "text-muted-foreground")}>Kijiji</button>
+      </div>
 
       <div className="space-y-3">
         <div className="grid grid-cols-2 gap-2">

@@ -17,8 +17,9 @@ import { ChevronLeft, Save } from "lucide-react";
 export const Route = createFileRoute("/app/chair/new")({ component: NewChair });
 
 const SOURCES = [
-  { v: "fb_marketplace", l: "FB Marketplace" }, { v: "kijiji", l: "Kijiji" },
-  { v: "supplier", l: "Supplier" }, { v: "estate_sale", l: "Estate Sale" }, { v: "other", l: "Other" },
+  { v: "fb_marketplace", l: "Facebook Marketplace" }, { v: "kijiji", l: "Kijiji" },
+  { v: "estate_sale", l: "Estate Sale / Garage Sale" }, { v: "supplier", l: "Supplier / Wholesale" },
+  { v: "other", l: "Other (eBay, etc.)" },
 ] as const;
 
 function NewChair() {
@@ -36,6 +37,7 @@ function NewChair() {
     list_price: "", date_listed: "", sold_price: "", date_sold: "", notes: "",
     purchase_price: "", helper_cost: "", refurb_cost: "", transport_cost: "", work_done: "",
     trip_start: "", trip_end: "", trip_km: "", trip_round_trip: false,
+    listing_url: "",
   });
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [receiptFiles, setReceiptFiles] = useState<File[]>([]);
@@ -85,7 +87,7 @@ function NewChair() {
         date_listed: f.date_listed || null,
         sold_price: f.sold_price ? num(f.sold_price) : null,
         date_sold: f.date_sold || null,
-        notes: f.notes || null,
+        notes: [f.listing_url && `Marketplace listing: ${f.listing_url}`, f.notes].filter(Boolean).join("\n\n") || null,
         purchase_price: num(f.purchase_price),
         helper_cost: num(f.helper_cost),
         refurb_cost: num(f.refurb_cost),
@@ -155,6 +157,7 @@ function NewChair() {
                 <SelectContent>{SOURCES.map((s) => <SelectItem key={s.v} value={s.v}>{s.l}</SelectItem>)}</SelectContent>
               </Select>
             </Field>
+            <Field label="Marketplace Listing URL"><Input type="url" value={f.listing_url} onChange={(e) => setF({ ...f, listing_url: e.target.value })} placeholder="https://facebook.com/marketplace/item/…" /></Field>
             <Field label="Date acquired"><Input type="date" value={f.date_acquired} onChange={(e) => setF({ ...f, date_acquired: e.target.value })} /></Field>
             <Field label="Storage unit">
               <Select value={f.storage_unit} onValueChange={(v) => setF({ ...f, storage_unit: v })}>

@@ -5,6 +5,11 @@ import { StatusBadge } from "@/components/StatusBadge";
 import { cad, daysBetween, landedCost, profit, STALE_DAYS } from "@/lib/cra";
 import { ChevronLeft } from "lucide-react";
 
+const SOURCE_LABELS: Record<string, string> = {
+  fb_marketplace: "Facebook Marketplace", kijiji: "Kijiji",
+  estate_sale: "Estate Sale / Garage Sale", supplier: "Supplier / Wholesale", other: "Other (eBay, etc.)",
+};
+
 export const Route = createFileRoute("/app/inventory/$chairId")({ component: ChairDetail });
 
 function ChairDetail() {
@@ -29,13 +34,20 @@ function ChairDetail() {
 
   return (
     <div className="px-4 pt-4 pb-24">
-      <button onClick={() => nav({ to: "/app/inventory" })} className="flex items-center text-sm text-muted-foreground mb-3"><ChevronLeft className="h-4 w-4" /> Inventory</button>
+      <button onClick={() => nav({ to: "/app/inventory" })} className="flex items-center text-sm text-muted-foreground mb-3"><ChevronLeft className="h-4 w-4" /> My Stock</button>
       <p className="text-xs font-mono text-muted-foreground tracking-wider">{chair.sku}</p>
       <div className="flex items-center gap-2 mt-1">
         <h1 className="text-2xl font-bold">{chair.brand}{chair.model ? ` · ${chair.model}` : ""}</h1>
         <StatusBadge status={chair.status} stale={stale} />
       </div>
       <p className="text-sm text-muted-foreground mt-1">{chair.condition ?? "—"} · {chair.storage_unit ?? "—"} · {days} days held</p>
+
+      <Section title="Flip Summary">
+        <KV k="Bought from" v={SOURCE_LABELS[chair.source] ?? chair.source} />
+        <KV k="Days in storage" v={`${days} days`} />
+        <KV k={chair.status === "sold" ? "Profit made" : "Projected profit"} v={cad(p)} bold tone={p >= 0 ? "success" : "destructive"} />
+        <KV k="Profit / day held" v={days > 0 ? cad(p / days) : "—"} />
+      </Section>
 
       <Section title="Financials">
         <KV k="Purchase" v={cad(chair.purchase_price)} />

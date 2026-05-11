@@ -64,7 +64,7 @@ function Inventory() {
   return (
     <div className="px-4 pt-4 pb-24">
       <div className="flex items-center justify-between mb-3">
-        <h1 className="text-2xl font-bold tracking-tight">Inventory</h1>
+        <h1 className="text-2xl font-bold tracking-tight">My Stock</h1>
         <span className="text-xs text-muted-foreground">{filtered.length} of {chairs.length}</span>
       </div>
 
@@ -92,9 +92,9 @@ function Inventory() {
         <p className="text-center text-muted-foreground text-sm py-12">Loading…</p>
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
-          <p className="text-muted-foreground text-sm">No chairs match.</p>
+          <p className="text-muted-foreground text-sm">No chairs in stock. Hit the marketplaces and add your first flip.</p>
           <Link to="/app/chair/new" className="inline-flex items-center mt-4 rounded-full bg-primary text-primary-foreground px-4 py-2 text-sm font-medium">
-            <Plus className="h-4 w-4 mr-1.5" /> Add your first chair
+            <Plus className="h-4 w-4 mr-1.5" /> Add your first flip
           </Link>
         </div>
       ) : (

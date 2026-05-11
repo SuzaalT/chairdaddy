@@ -61,9 +61,9 @@ function Dashboard() {
       <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
 
       <div className="grid grid-cols-2 gap-3">
-        <Stat label="Cash Invested" value={cad(cashInvested)} hint={`${inStock.length} chairs in stock`} icon={Banknote} />
+        <Stat label="Capital Deployed" value={cad(cashInvested)} hint="sitting in your storage" icon={Banknote} />
         <Stat label="Total Profit" value={cad(totalProfit)} hint={`${sold.length} sold`} tone="success" icon={TrendingUp} />
-        <Stat label="Listed Value" value={cad(listedValue)} hint="Active listings" icon={Tag} />
+        <Stat label="Active Listings Value" value={cad(listedValue)} hint="Active listings" icon={Tag} />
         <Stat label="Stale Chairs" value={stale.length} hint=">30 days" tone={stale.length ? "warning" : "default"} icon={Clock} />
       </div>
 
@@ -81,7 +81,8 @@ function Dashboard() {
         <div className="h-2 rounded-full bg-muted overflow-hidden">
           <div className={"h-full transition-all " + hstBar} style={{ width: `${Math.min(hstPct * 100, 100)}%` }} />
         </div>
-        <p className="text-xs text-muted-foreground mt-2">
+        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-medium mt-2">Ontario · CRA threshold</p>
+        <p className="text-xs text-muted-foreground mt-1">
           {hstPct >= 1 ? "Over threshold — register for HST with CRA." : hstPct >= 0.8 ? "Approaching threshold — start preparing for HST registration." : "On track."}
         </p>
       </div>
