@@ -14,16 +14,449 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      chairs: {
+        Row: {
+          brand: string
+          condition: string | null
+          created_at: string
+          created_by: string
+          date_acquired: string
+          date_listed: string | null
+          date_sold: string | null
+          defects: string | null
+          helper_cost: number
+          id: string
+          list_price: number | null
+          model: string | null
+          notes: string | null
+          proof_purchase_url: string | null
+          purchase_price: number
+          receipt_urls: string[] | null
+          refurb_cost: number
+          sku: string
+          sold_price: number | null
+          source: Database["public"]["Enums"]["chair_source"]
+          status: Database["public"]["Enums"]["chair_status"]
+          storage_unit: string | null
+          team_id: string
+          transport_cost: number
+          trip_end: string | null
+          trip_km: number | null
+          trip_round_trip: boolean | null
+          trip_start: string | null
+          updated_at: string
+          work_done: string | null
+        }
+        Insert: {
+          brand: string
+          condition?: string | null
+          created_at?: string
+          created_by: string
+          date_acquired?: string
+          date_listed?: string | null
+          date_sold?: string | null
+          defects?: string | null
+          helper_cost?: number
+          id?: string
+          list_price?: number | null
+          model?: string | null
+          notes?: string | null
+          proof_purchase_url?: string | null
+          purchase_price?: number
+          receipt_urls?: string[] | null
+          refurb_cost?: number
+          sku: string
+          sold_price?: number | null
+          source?: Database["public"]["Enums"]["chair_source"]
+          status?: Database["public"]["Enums"]["chair_status"]
+          storage_unit?: string | null
+          team_id: string
+          transport_cost?: number
+          trip_end?: string | null
+          trip_km?: number | null
+          trip_round_trip?: boolean | null
+          trip_start?: string | null
+          updated_at?: string
+          work_done?: string | null
+        }
+        Update: {
+          brand?: string
+          condition?: string | null
+          created_at?: string
+          created_by?: string
+          date_acquired?: string
+          date_listed?: string | null
+          date_sold?: string | null
+          defects?: string | null
+          helper_cost?: number
+          id?: string
+          list_price?: number | null
+          model?: string | null
+          notes?: string | null
+          proof_purchase_url?: string | null
+          purchase_price?: number
+          receipt_urls?: string[] | null
+          refurb_cost?: number
+          sku?: string
+          sold_price?: number | null
+          source?: Database["public"]["Enums"]["chair_source"]
+          status?: Database["public"]["Enums"]["chair_status"]
+          storage_unit?: string | null
+          team_id?: string
+          transport_cost?: number
+          trip_end?: string | null
+          trip_km?: number | null
+          trip_round_trip?: boolean | null
+          trip_start?: string | null
+          updated_at?: string
+          work_done?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chairs_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_messages: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          image_url: string | null
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string | null
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expenses: {
+        Row: {
+          amount: number
+          category: Database["public"]["Enums"]["expense_category"]
+          created_at: string
+          created_by: string
+          expense_date: string
+          id: string
+          notes: string | null
+          receipt_url: string | null
+          team_id: string
+          vendor: string | null
+        }
+        Insert: {
+          amount: number
+          category?: Database["public"]["Enums"]["expense_category"]
+          created_at?: string
+          created_by: string
+          expense_date?: string
+          id?: string
+          notes?: string | null
+          receipt_url?: string | null
+          team_id: string
+          vendor?: string | null
+        }
+        Update: {
+          amount?: number
+          category?: Database["public"]["Enums"]["expense_category"]
+          created_at?: string
+          created_by?: string
+          expense_date?: string
+          id?: string
+          notes?: string | null
+          receipt_url?: string | null
+          team_id?: string
+          vendor?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expenses_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      member_locations: {
+        Row: {
+          lat: number | null
+          lng: number | null
+          sharing: boolean
+          team_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          lat?: number | null
+          lng?: number | null
+          sharing?: boolean
+          team_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          lat?: number | null
+          lng?: number | null
+          sharing?: boolean
+          team_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_locations_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          anthropic_key: string | null
+          created_at: string
+          current_team_id: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          notification_email: string | null
+          updated_at: string
+        }
+        Insert: {
+          anthropic_key?: string | null
+          created_at?: string
+          current_team_id?: string | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          notification_email?: string | null
+          updated_at?: string
+        }
+        Update: {
+          anthropic_key?: string | null
+          created_at?: string
+          current_team_id?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          notification_email?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_current_team_id_fkey"
+            columns: ["current_team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      storage_units: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          team_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          team_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "storage_units_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_members: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["team_role"]
+          team_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["team_role"]
+          team_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["team_role"]
+          team_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          brand_prefix: string
+          created_at: string
+          id: string
+          invite_code: string
+          name: string
+          owner_id: string
+        }
+        Insert: {
+          brand_prefix?: string
+          created_at?: string
+          id?: string
+          invite_code: string
+          name: string
+          owner_id: string
+        }
+        Update: {
+          brand_prefix?: string
+          created_at?: string
+          id?: string
+          invite_code?: string
+          name?: string
+          owner_id?: string
+        }
+        Relationships: []
+      }
+      trips: {
+        Row: {
+          chair_id: string | null
+          created_at: string
+          created_by: string
+          end_location: string
+          id: string
+          km: number
+          purpose: string | null
+          round_trip: boolean
+          start_location: string
+          team_id: string
+          trip_date: string
+        }
+        Insert: {
+          chair_id?: string | null
+          created_at?: string
+          created_by: string
+          end_location: string
+          id?: string
+          km: number
+          purpose?: string | null
+          round_trip?: boolean
+          start_location: string
+          team_id: string
+          trip_date?: string
+        }
+        Update: {
+          chair_id?: string | null
+          created_at?: string
+          created_by?: string
+          end_location?: string
+          id?: string
+          km?: number
+          purpose?: string | null
+          round_trip?: boolean
+          start_location?: string
+          team_id?: string
+          trip_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trips_chair_id_fkey"
+            columns: ["chair_id"]
+            isOneToOne: false
+            referencedRelation: "chairs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trips_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      create_team: { Args: { _name: string }; Returns: string }
+      current_user_team: { Args: never; Returns: string }
+      is_team_member: {
+        Args: { _team_id: string; _user_id: string }
+        Returns: boolean
+      }
+      join_team_by_code: { Args: { _code: string }; Returns: string }
     }
     Enums: {
-      [_ in never]: never
+      chair_source:
+        | "fb_marketplace"
+        | "kijiji"
+        | "supplier"
+        | "estate_sale"
+        | "other"
+      chair_status: "in_stock" | "listed" | "sold"
+      expense_category:
+        | "vehicle_fuel"
+        | "helper_wages"
+        | "refurb_supplies"
+        | "cleaning_supplies"
+        | "tools_equipment"
+        | "storage_rent"
+        | "phone_internet"
+        | "insurance"
+        | "bank_fees"
+        | "other"
+      team_role: "owner" | "member"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +583,28 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      chair_source: [
+        "fb_marketplace",
+        "kijiji",
+        "supplier",
+        "estate_sale",
+        "other",
+      ],
+      chair_status: ["in_stock", "listed", "sold"],
+      expense_category: [
+        "vehicle_fuel",
+        "helper_wages",
+        "refurb_supplies",
+        "cleaning_supplies",
+        "tools_equipment",
+        "storage_rent",
+        "phone_internet",
+        "insurance",
+        "bank_fees",
+        "other",
+      ],
+      team_role: ["owner", "member"],
+    },
   },
 } as const
