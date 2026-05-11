@@ -37,6 +37,13 @@ function ChairDetail() {
       </div>
       <p className="text-sm text-muted-foreground mt-1">{chair.condition ?? "—"} · {chair.storage_unit ?? "—"} · {days} days held</p>
 
+      <Section title="Flip Summary">
+        <KV k="Bought from" v={SOURCE_LABELS[chair.source] ?? chair.source} />
+        <KV k="Days in storage" v={`${days} days`} />
+        <KV k={chair.status === "sold" ? "Profit made" : "Projected profit"} v={cad(p)} bold tone={p >= 0 ? "success" : "destructive"} />
+        <KV k="Profit / day held" v={days > 0 ? cad(p / days) : "—"} />
+      </Section>
+
       <Section title="Financials">
         <KV k="Purchase" v={cad(chair.purchase_price)} />
         <KV k="Helper" v={cad(chair.helper_cost)} />
