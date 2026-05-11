@@ -17,8 +17,9 @@ import { ChevronLeft, Save } from "lucide-react";
 export const Route = createFileRoute("/app/chair/new")({ component: NewChair });
 
 const SOURCES = [
-  { v: "fb_marketplace", l: "FB Marketplace" }, { v: "kijiji", l: "Kijiji" },
-  { v: "supplier", l: "Supplier" }, { v: "estate_sale", l: "Estate Sale" }, { v: "other", l: "Other" },
+  { v: "fb_marketplace", l: "Facebook Marketplace" }, { v: "kijiji", l: "Kijiji" },
+  { v: "estate_sale", l: "Estate Sale / Garage Sale" }, { v: "supplier", l: "Supplier / Wholesale" },
+  { v: "other", l: "Other (eBay, etc.)" },
 ] as const;
 
 function NewChair() {
