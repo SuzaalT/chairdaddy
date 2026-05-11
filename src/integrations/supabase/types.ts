@@ -411,6 +411,7 @@ export type Database = {
           end_location: string
           estimated_km: number | null
           id: string
+          is_personal: boolean
           km: number
           purpose: string | null
           round_trip: boolean
@@ -425,6 +426,7 @@ export type Database = {
           end_location: string
           estimated_km?: number | null
           id?: string
+          is_personal?: boolean
           km: number
           purpose?: string | null
           round_trip?: boolean
@@ -439,6 +441,7 @@ export type Database = {
           end_location?: string
           estimated_km?: number | null
           id?: string
+          is_personal?: boolean
           km?: number
           purpose?: string | null
           round_trip?: boolean
@@ -471,9 +474,12 @@ export type Database = {
           created_by: string
           expense_date: string
           id: string
+          litres: number | null
           notes: string | null
           odometer_km: number | null
+          price_per_litre: number | null
           receipt_url: string | null
+          station: string | null
           team_id: string
           vendor: string | null
         }
@@ -484,9 +490,12 @@ export type Database = {
           created_by: string
           expense_date?: string
           id?: string
+          litres?: number | null
           notes?: string | null
           odometer_km?: number | null
+          price_per_litre?: number | null
           receipt_url?: string | null
+          station?: string | null
           team_id: string
           vendor?: string | null
         }
@@ -497,9 +506,12 @@ export type Database = {
           created_by?: string
           expense_date?: string
           id?: string
+          litres?: number | null
           notes?: string | null
           odometer_km?: number | null
+          price_per_litre?: number | null
           receipt_url?: string | null
+          station?: string | null
           team_id?: string
           vendor?: string | null
         }
