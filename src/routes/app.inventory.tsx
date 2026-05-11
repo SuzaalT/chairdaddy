@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
-import { useState, useMemo } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState, useMemo, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTeam } from "@/hooks/use-team";
 import { ChairCard } from "@/components/ChairCard";
@@ -15,6 +15,7 @@ export const Route = createFileRoute("/app/inventory")({ component: Inventory })
 
 function Inventory() {
   const { team } = useTeam();
+  const qc = useQueryClient();
   const [filter, setFilter] = useState<Filter>("all");
   const [q, setQ] = useState("");
   const { data: chairs = [], isLoading } = useQuery({
@@ -26,6 +27,16 @@ function Inventory() {
       return data ?? [];
     },
   });
+
+  useEffect(() => {
+    if (!team) return;
+    const ch = supabase
+      .channel(`chairs:${team.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "chairs", filter: `team_id=eq.${team.id}` },
+        () => qc.invalidateQueries({ queryKey: ["chairs", team.id] }))
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [team, qc]);
 
   const filtered = useMemo(() => {
     return chairs.filter((c) => {
