@@ -29,7 +29,7 @@ function ChairDetail() {
 
   return (
     <div className="px-4 pt-4 pb-24">
-      <button onClick={() => nav({ to: "/app/inventory" })} className="flex items-center text-sm text-muted-foreground mb-3"><ChevronLeft className="h-4 w-4" /> Inventory</button>
+      <button onClick={() => nav({ to: "/app/inventory" })} className="flex items-center text-sm text-muted-foreground mb-3"><ChevronLeft className="h-4 w-4" /> My Stock</button>
       <p className="text-xs font-mono text-muted-foreground tracking-wider">{chair.sku}</p>
       <div className="flex items-center gap-2 mt-1">
         <h1 className="text-2xl font-bold">{chair.brand}{chair.model ? ` · ${chair.model}` : ""}</h1>
