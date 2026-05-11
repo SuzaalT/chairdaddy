@@ -41,6 +41,7 @@ export type Database = {
           team_id: string
           transport_cost: number
           trip_end: string | null
+          trip_estimated_km: number | null
           trip_km: number | null
           trip_round_trip: boolean | null
           trip_start: string | null
@@ -73,6 +74,7 @@ export type Database = {
           team_id: string
           transport_cost?: number
           trip_end?: string | null
+          trip_estimated_km?: number | null
           trip_km?: number | null
           trip_round_trip?: boolean | null
           trip_start?: string | null
@@ -105,6 +107,7 @@ export type Database = {
           team_id?: string
           transport_cost?: number
           trip_end?: string | null
+          trip_estimated_km?: number | null
           trip_km?: number | null
           trip_round_trip?: boolean | null
           trip_start?: string | null
@@ -237,6 +240,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      odometer_readings: {
+        Row: {
+          created_at: string
+          created_by: string
+          end_km: number | null
+          id: string
+          start_km: number | null
+          team_id: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          end_km?: number | null
+          id?: string
+          start_km?: number | null
+          team_id: string
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          end_km?: number | null
+          id?: string
+          start_km?: number | null
+          team_id?: string
+          updated_at?: string
+          year?: number
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
@@ -373,6 +409,7 @@ export type Database = {
           created_at: string
           created_by: string
           end_location: string
+          estimated_km: number | null
           id: string
           km: number
           purpose: string | null
@@ -386,6 +423,7 @@ export type Database = {
           created_at?: string
           created_by: string
           end_location: string
+          estimated_km?: number | null
           id?: string
           km: number
           purpose?: string | null
@@ -399,6 +437,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           end_location?: string
+          estimated_km?: number | null
           id?: string
           km?: number
           purpose?: string | null
@@ -423,6 +462,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      vehicle_expenses: {
+        Row: {
+          amount: number
+          category: Database["public"]["Enums"]["vehicle_expense_category"]
+          created_at: string
+          created_by: string
+          expense_date: string
+          id: string
+          notes: string | null
+          odometer_km: number | null
+          receipt_url: string | null
+          team_id: string
+          vendor: string | null
+        }
+        Insert: {
+          amount: number
+          category?: Database["public"]["Enums"]["vehicle_expense_category"]
+          created_at?: string
+          created_by: string
+          expense_date?: string
+          id?: string
+          notes?: string | null
+          odometer_km?: number | null
+          receipt_url?: string | null
+          team_id: string
+          vendor?: string | null
+        }
+        Update: {
+          amount?: number
+          category?: Database["public"]["Enums"]["vehicle_expense_category"]
+          created_at?: string
+          created_by?: string
+          expense_date?: string
+          id?: string
+          notes?: string | null
+          odometer_km?: number | null
+          receipt_url?: string | null
+          team_id?: string
+          vendor?: string | null
+        }
+        Relationships: []
       }
     }
     Views: {
@@ -457,6 +538,17 @@ export type Database = {
         | "bank_fees"
         | "other"
       team_role: "owner" | "member"
+      vehicle_expense_category:
+        | "gas"
+        | "insurance"
+        | "oil_change"
+        | "tires"
+        | "registration"
+        | "repairs"
+        | "parking"
+        | "car_wash"
+        | "lease"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -605,6 +697,18 @@ export const Constants = {
         "other",
       ],
       team_role: ["owner", "member"],
+      vehicle_expense_category: [
+        "gas",
+        "insurance",
+        "oil_change",
+        "tires",
+        "registration",
+        "repairs",
+        "parking",
+        "car_wash",
+        "lease",
+        "other",
+      ],
     },
   },
 } as const
