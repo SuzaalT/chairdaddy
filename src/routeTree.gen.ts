@@ -14,7 +14,14 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
+import { Route as AppTeamRouteImport } from './routes/app.team'
+import { Route as AppSettingsRouteImport } from './routes/app.settings'
+import { Route as AppLogbookRouteImport } from './routes/app.logbook'
+import { Route as AppListingAiRouteImport } from './routes/app.listing-ai'
 import { Route as AppInventoryRouteImport } from './routes/app.inventory'
+import { Route as AppExpensesRouteImport } from './routes/app.expenses'
+import { Route as AppInventoryChairIdRouteImport } from './routes/app.inventory.$chairId'
+import { Route as AppChairNewRouteImport } from './routes/app.chair.new'
 
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
@@ -41,9 +48,44 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
+const AppTeamRoute = AppTeamRouteImport.update({
+  id: '/team',
+  path: '/team',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLogbookRoute = AppLogbookRouteImport.update({
+  id: '/logbook',
+  path: '/logbook',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppListingAiRoute = AppListingAiRouteImport.update({
+  id: '/listing-ai',
+  path: '/listing-ai',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppInventoryRoute = AppInventoryRouteImport.update({
   id: '/inventory',
   path: '/inventory',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppExpensesRoute = AppExpensesRouteImport.update({
+  id: '/expenses',
+  path: '/expenses',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInventoryChairIdRoute = AppInventoryChairIdRouteImport.update({
+  id: '/$chairId',
+  path: '/$chairId',
+  getParentRoute: () => AppInventoryRoute,
+} as any)
+const AppChairNewRoute = AppChairNewRouteImport.update({
+  id: '/chair/new',
+  path: '/chair/new',
   getParentRoute: () => AppRoute,
 } as any)
 
@@ -52,15 +94,29 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
-  '/app/inventory': typeof AppInventoryRoute
+  '/app/expenses': typeof AppExpensesRoute
+  '/app/inventory': typeof AppInventoryRouteWithChildren
+  '/app/listing-ai': typeof AppListingAiRoute
+  '/app/logbook': typeof AppLogbookRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/team': typeof AppTeamRoute
   '/app/': typeof AppIndexRoute
+  '/app/chair/new': typeof AppChairNewRoute
+  '/app/inventory/$chairId': typeof AppInventoryChairIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
-  '/app/inventory': typeof AppInventoryRoute
+  '/app/expenses': typeof AppExpensesRoute
+  '/app/inventory': typeof AppInventoryRouteWithChildren
+  '/app/listing-ai': typeof AppListingAiRoute
+  '/app/logbook': typeof AppLogbookRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/team': typeof AppTeamRoute
   '/app': typeof AppIndexRoute
+  '/app/chair/new': typeof AppChairNewRoute
+  '/app/inventory/$chairId': typeof AppInventoryChairIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -68,8 +124,15 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
-  '/app/inventory': typeof AppInventoryRoute
+  '/app/expenses': typeof AppExpensesRoute
+  '/app/inventory': typeof AppInventoryRouteWithChildren
+  '/app/listing-ai': typeof AppListingAiRoute
+  '/app/logbook': typeof AppLogbookRoute
+  '/app/settings': typeof AppSettingsRoute
+  '/app/team': typeof AppTeamRoute
   '/app/': typeof AppIndexRoute
+  '/app/chair/new': typeof AppChairNewRoute
+  '/app/inventory/$chairId': typeof AppInventoryChairIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -78,18 +141,44 @@ export interface FileRouteTypes {
     | '/app'
     | '/login'
     | '/onboarding'
+    | '/app/expenses'
     | '/app/inventory'
+    | '/app/listing-ai'
+    | '/app/logbook'
+    | '/app/settings'
+    | '/app/team'
     | '/app/'
+    | '/app/chair/new'
+    | '/app/inventory/$chairId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/onboarding' | '/app/inventory' | '/app'
+  to:
+    | '/'
+    | '/login'
+    | '/onboarding'
+    | '/app/expenses'
+    | '/app/inventory'
+    | '/app/listing-ai'
+    | '/app/logbook'
+    | '/app/settings'
+    | '/app/team'
+    | '/app'
+    | '/app/chair/new'
+    | '/app/inventory/$chairId'
   id:
     | '__root__'
     | '/'
     | '/app'
     | '/login'
     | '/onboarding'
+    | '/app/expenses'
     | '/app/inventory'
+    | '/app/listing-ai'
+    | '/app/logbook'
+    | '/app/settings'
+    | '/app/team'
     | '/app/'
+    | '/app/chair/new'
+    | '/app/inventory/$chairId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -136,6 +225,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/team': {
+      id: '/app/team'
+      path: '/team'
+      fullPath: '/app/team'
+      preLoaderRoute: typeof AppTeamRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/settings': {
+      id: '/app/settings'
+      path: '/settings'
+      fullPath: '/app/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/logbook': {
+      id: '/app/logbook'
+      path: '/logbook'
+      fullPath: '/app/logbook'
+      preLoaderRoute: typeof AppLogbookRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/listing-ai': {
+      id: '/app/listing-ai'
+      path: '/listing-ai'
+      fullPath: '/app/listing-ai'
+      preLoaderRoute: typeof AppListingAiRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/inventory': {
       id: '/app/inventory'
       path: '/inventory'
@@ -143,17 +260,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppInventoryRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/expenses': {
+      id: '/app/expenses'
+      path: '/expenses'
+      fullPath: '/app/expenses'
+      preLoaderRoute: typeof AppExpensesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/inventory/$chairId': {
+      id: '/app/inventory/$chairId'
+      path: '/$chairId'
+      fullPath: '/app/inventory/$chairId'
+      preLoaderRoute: typeof AppInventoryChairIdRouteImport
+      parentRoute: typeof AppInventoryRoute
+    }
+    '/app/chair/new': {
+      id: '/app/chair/new'
+      path: '/chair/new'
+      fullPath: '/app/chair/new'
+      preLoaderRoute: typeof AppChairNewRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
+interface AppInventoryRouteChildren {
+  AppInventoryChairIdRoute: typeof AppInventoryChairIdRoute
+}
+
+const AppInventoryRouteChildren: AppInventoryRouteChildren = {
+  AppInventoryChairIdRoute: AppInventoryChairIdRoute,
+}
+
+const AppInventoryRouteWithChildren = AppInventoryRoute._addFileChildren(
+  AppInventoryRouteChildren,
+)
+
 interface AppRouteChildren {
-  AppInventoryRoute: typeof AppInventoryRoute
+  AppExpensesRoute: typeof AppExpensesRoute
+  AppInventoryRoute: typeof AppInventoryRouteWithChildren
+  AppListingAiRoute: typeof AppListingAiRoute
+  AppLogbookRoute: typeof AppLogbookRoute
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppTeamRoute: typeof AppTeamRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppChairNewRoute: typeof AppChairNewRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
-  AppInventoryRoute: AppInventoryRoute,
+  AppExpensesRoute: AppExpensesRoute,
+  AppInventoryRoute: AppInventoryRouteWithChildren,
+  AppListingAiRoute: AppListingAiRoute,
+  AppLogbookRoute: AppLogbookRoute,
+  AppSettingsRoute: AppSettingsRoute,
+  AppTeamRoute: AppTeamRoute,
   AppIndexRoute: AppIndexRoute,
+  AppChairNewRoute: AppChairNewRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
