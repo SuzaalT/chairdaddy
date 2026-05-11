@@ -157,6 +157,7 @@ function NewChair() {
                 <SelectContent>{SOURCES.map((s) => <SelectItem key={s.v} value={s.v}>{s.l}</SelectItem>)}</SelectContent>
               </Select>
             </Field>
+            <Field label="Marketplace Listing URL"><Input type="url" value={f.listing_url} onChange={(e) => setF({ ...f, listing_url: e.target.value })} placeholder="https://facebook.com/marketplace/item/…" /></Field>
             <Field label="Date acquired"><Input type="date" value={f.date_acquired} onChange={(e) => setF({ ...f, date_acquired: e.target.value })} /></Field>
             <Field label="Storage unit">
               <Select value={f.storage_unit} onValueChange={(v) => setF({ ...f, storage_unit: v })}>
