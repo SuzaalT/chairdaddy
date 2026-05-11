@@ -213,27 +213,61 @@ function NewChair() {
           </>
         )}
 
-        {section === "trip" && (
-          <>
-            <Field label="Start location"><Input value={f.trip_start} onChange={(e) => setF({ ...f, trip_start: e.target.value })} placeholder="Toronto, ON" /></Field>
-            <Field label="End location"><Input value={f.trip_end} onChange={(e) => setF({ ...f, trip_end: e.target.value })} placeholder="Hamilton, ON" /></Field>
-            <Field label="Km driven (one way)"><Input type="number" step="0.1" value={f.trip_km} onChange={(e) => setF({ ...f, trip_km: e.target.value })} /></Field>
-            <div className="flex items-center justify-between rounded-xl bg-card border border-border p-3">
-              <div>
-                <p className="text-sm font-medium">Round trip</p>
-                <p className="text-xs text-muted-foreground">Doubles the km logged</p>
+        {section === "trip" && (() => {
+          const est = num(f.trip_estimated_km);
+          const actual = num(f.trip_km);
+          const v = est && actual ? variancePct(actual, est) : 0;
+          const flagged = est && actual && Math.abs(v) > VARIANCE_FLAG_PCT;
+          async function autoEstimate() {
+            if (!f.trip_start || !f.trip_end) { toast.error("Enter both start and end"); return; }
+            setEstimating(true);
+            try {
+              const { km } = await estimateDrivingKm(f.trip_start, f.trip_end);
+              const rounded = Math.round(km * 10) / 10;
+              setF((p) => ({ ...p, trip_estimated_km: String(rounded), trip_km: p.trip_km || String(rounded) }));
+              toast.success(`OSRM: ${rounded} km one-way`);
+            } catch (e) { toast.error((e as Error).message); }
+            finally { setEstimating(false); }
+          }
+          return (
+            <>
+              <Field label="Start address"><Input value={f.trip_start} onChange={(e) => setF({ ...f, trip_start: e.target.value, trip_estimated_km: "" })} placeholder="123 Main St, Toronto, ON" /></Field>
+              <Field label="End address"><Input value={f.trip_end} onChange={(e) => setF({ ...f, trip_end: e.target.value, trip_estimated_km: "" })} placeholder="456 King St, Hamilton, ON" /></Field>
+              <Button type="button" variant="secondary" className="w-full" onClick={autoEstimate} disabled={estimating || !f.trip_start || !f.trip_end}>
+                <MapPin className="h-4 w-4 mr-1.5" />{estimating ? "Calculating route…" : "Auto-calculate driving distance"}
+              </Button>
+              {est > 0 && (
+                <div className="rounded-xl bg-card border border-border p-3 text-sm">
+                  <div className="flex justify-between"><span className="text-muted-foreground">OSM driving distance</span><span className="font-semibold tabular-nums">{est} km</span></div>
+                </div>
+              )}
+              <Field label="Actual km driven (one way)"><Input type="number" step="0.1" value={f.trip_km} onChange={(e) => setF({ ...f, trip_km: e.target.value })} placeholder="From odometer" /></Field>
+              <div className="flex items-center justify-between rounded-xl bg-card border border-border p-3">
+                <div>
+                  <p className="text-sm font-medium">Round trip</p>
+                  <p className="text-xs text-muted-foreground">Doubles the km logged</p>
+                </div>
+                <Switch checked={f.trip_round_trip} onCheckedChange={(v2) => setF({ ...f, trip_round_trip: v2 })} />
               </div>
-              <Switch checked={f.trip_round_trip} onCheckedChange={(v) => setF({ ...f, trip_round_trip: v })} />
-            </div>
-            {f.trip_km && (
-              <div className="rounded-xl bg-muted/60 p-3 text-sm space-y-1">
-                <Row k="Total km" v={`${tripKmTotal(num(f.trip_km), f.trip_round_trip)} km`} />
-                <Row k="CRA deduction (@ $0.70/km)" v={cad(tripDeduction(num(f.trip_km), f.trip_round_trip))} bold tone="success" />
-                <p className="text-xs text-muted-foreground pt-1">Auto-fills transport cost and logs trip to Vehicle Logbook on save.</p>
-              </div>
-            )}
-          </>
-        )}
+              {flagged && (
+                <div className="rounded-xl border border-[oklch(0.6_0.15_60)] bg-[oklch(0.97_0.04_85)] p-3 flex gap-2">
+                  <AlertTriangle className="h-4 w-4 text-[oklch(0.55_0.15_60)] shrink-0 mt-0.5" />
+                  <div className="text-xs">
+                    <p className="font-semibold text-[oklch(0.45_0.15_60)]">Variance {v > 0 ? "+" : ""}{v.toFixed(1)}%</p>
+                    <p className="text-muted-foreground mt-0.5">Actual differs from OSM route by &gt;{VARIANCE_FLAG_PCT}%. Add a note (detour, stop, alternate route) for clean CRA records.</p>
+                  </div>
+                </div>
+              )}
+              {f.trip_km && (
+                <div className="rounded-xl bg-muted/60 p-3 text-sm space-y-1">
+                  <Row k="Total km logged" v={`${tripKmTotal(num(f.trip_km), f.trip_round_trip)} km`} />
+                  <Row k="CRA per-km estimate (@ $0.70)" v={cad(tripDeduction(num(f.trip_km), f.trip_round_trip))} bold tone="success" />
+                  <p className="text-xs text-muted-foreground pt-1">Logs to Vehicle Logbook on save. Actual deduction in dashboard uses your vehicle expenses × business-use %.</p>
+                </div>
+              )}
+            </>
+          );
+        })()}
 
         {section === "proof" && (
           <>
