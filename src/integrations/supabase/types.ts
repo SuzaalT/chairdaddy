@@ -411,6 +411,7 @@ export type Database = {
           end_location: string
           estimated_km: number | null
           id: string
+          is_personal: boolean
           km: number
           purpose: string | null
           round_trip: boolean
@@ -425,6 +426,7 @@ export type Database = {
           end_location: string
           estimated_km?: number | null
           id?: string
+          is_personal?: boolean
           km: number
           purpose?: string | null
           round_trip?: boolean
@@ -439,6 +441,7 @@ export type Database = {
           end_location?: string
           estimated_km?: number | null
           id?: string
+          is_personal?: boolean
           km?: number
           purpose?: string | null
           round_trip?: boolean
