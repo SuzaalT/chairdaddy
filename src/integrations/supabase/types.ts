@@ -471,9 +471,12 @@ export type Database = {
           created_by: string
           expense_date: string
           id: string
+          litres: number | null
           notes: string | null
           odometer_km: number | null
+          price_per_litre: number | null
           receipt_url: string | null
+          station: string | null
           team_id: string
           vendor: string | null
         }
@@ -484,9 +487,12 @@ export type Database = {
           created_by: string
           expense_date?: string
           id?: string
+          litres?: number | null
           notes?: string | null
           odometer_km?: number | null
+          price_per_litre?: number | null
           receipt_url?: string | null
+          station?: string | null
           team_id: string
           vendor?: string | null
         }
@@ -497,9 +503,12 @@ export type Database = {
           created_by?: string
           expense_date?: string
           id?: string
+          litres?: number | null
           notes?: string | null
           odometer_km?: number | null
+          price_per_litre?: number | null
           receipt_url?: string | null
+          station?: string | null
           team_id?: string
           vendor?: string | null
         }
