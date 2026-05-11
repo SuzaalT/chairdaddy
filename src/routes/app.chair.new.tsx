@@ -37,9 +37,10 @@ function NewChair() {
     storage_unit: "", condition: "Good", defects: "", status: "in_stock" as "in_stock" | "listed" | "sold",
     list_price: "", date_listed: "", sold_price: "", date_sold: "", notes: "",
     purchase_price: "", helper_cost: "", refurb_cost: "", transport_cost: "", work_done: "",
-    trip_start: "", trip_end: "", trip_km: "", trip_round_trip: false,
+    trip_start: "", trip_end: "", trip_km: "", trip_estimated_km: "", trip_round_trip: false,
     listing_url: "",
   });
+  const [estimating, setEstimating] = useState(false);
   const [proofFile, setProofFile] = useState<File | null>(null);
   const [receiptFiles, setReceiptFiles] = useState<File[]>([]);
 
