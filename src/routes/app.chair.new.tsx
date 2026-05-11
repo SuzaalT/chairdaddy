@@ -87,7 +87,7 @@ function NewChair() {
         date_listed: f.date_listed || null,
         sold_price: f.sold_price ? num(f.sold_price) : null,
         date_sold: f.date_sold || null,
-        notes: f.notes || null,
+        notes: [f.listing_url && `Marketplace listing: ${f.listing_url}`, f.notes].filter(Boolean).join("\n\n") || null,
         purchase_price: num(f.purchase_price),
         helper_cost: num(f.helper_cost),
         refurb_cost: num(f.refurb_cost),
