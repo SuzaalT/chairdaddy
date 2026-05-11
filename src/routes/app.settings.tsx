@@ -74,8 +74,8 @@ function Settings() {
       <Section title="Account">
         <div className="space-y-3 p-4">
           <div><Label className="text-xs">Full name</Label><Input value={name} onChange={(e) => setName(e.target.value)} /></div>
-          <div><Label className="text-xs">Notification email</Label><Input type="email" value={notify} onChange={(e) => setNotify(e.target.value)} placeholder="you@gmail.com" />
-            <p className="text-[11px] text-muted-foreground mt-1">All chair save records are sent here.</p>
+          <div><Label className="text-xs">Business Gmail (for chair records)</Label><Input type="email" value={notify} onChange={(e) => setNotify(e.target.value)} placeholder="you@gmail.com" />
+            <p className="text-[11px] text-muted-foreground mt-1">Every chair you save sends a full organized record here — your CRA paper trail.</p>
           </div>
           <div><Label className="text-xs">Anthropic API key</Label><Input type="password" value={key} onChange={(e) => setKey(e.target.value)} placeholder="sk-ant-…" />
             <p className="text-[11px] text-muted-foreground mt-1">Used for Listing AI and receipt scanning. Stored privately on your profile.</p>
