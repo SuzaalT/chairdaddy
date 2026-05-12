@@ -191,8 +191,7 @@ function NewChair() {
       }
 
       toast.success(`Saved ${sku}`);
-      // Email send (best effort)
-      sendChairEmail(chair, sku, proofUrl, receiptUrls).catch((e) => console.warn('email failed', e));
+      sendChairEmail(chair, sku, proofUrl, receiptUrls).catch((e: unknown) => console.warn('email failed', e));
       nav({ to: "/app/inventory" });
     } catch (e) {
       toast.error((e as Error).message);
