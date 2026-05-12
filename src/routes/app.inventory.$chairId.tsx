@@ -4,16 +4,32 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { StatusBadge } from "@/components/StatusBadge";
 import { cad, daysBetween, landedCost, profit, STALE_DAYS } from "@/lib/cra";
-import { ChevronLeft, Trash2 } from "lucide-react";
+import { ChevronLeft, Trash2, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { usePermission, PERMISSIONS } from "@/hooks/use-permission";
+import { sendTransactionalEmail } from "@/lib/email/send";
 import { toast } from "sonner";
 
 const SOURCE_LABELS: Record<string, string> = {
   fb_marketplace: "Facebook Marketplace", kijiji: "Kijiji",
   estate_sale: "Estate Sale / Garage Sale", supplier: "Supplier / Wholesale", other: "Other (eBay, etc.)",
 };
+
+const PAYMENT_METHODS = [
+  { v: "cash", l: "Cash" },
+  { v: "etransfer", l: "e-Transfer" },
+  { v: "credit", l: "Credit / Debit" },
+  { v: "paypal", l: "PayPal" },
+  { v: "other", l: "Other" },
+];
+
+const PAYMENT_LABELS: Record<string, string> = Object.fromEntries(PAYMENT_METHODS.map((p) => [p.v, p.l]));
 
 export const Route = createFileRoute("/app/inventory/$chairId")({ component: ChairDetail });
 
@@ -22,7 +38,14 @@ function ChairDetail() {
   const nav = useNavigate();
   const qc = useQueryClient();
   const canDelete = usePermission(PERMISSIONS.CHAIR_DELETE);
+  const canEdit = usePermission(PERMISSIONS.CHAIR_EDIT);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [sellOpen, setSellOpen] = useState(false);
+  const [sellBusy, setSellBusy] = useState(false);
+  const [sellForm, setSellForm] = useState({
+    sold_price: "", payment_method: "etransfer", buyer_name: "",
+    date_sold: new Date().toISOString().slice(0, 10), sale_notes: "",
+  });
 
   const { data: chair, isLoading } = useQuery({
     queryKey: ["chair", chairId],
@@ -40,6 +63,7 @@ function ChairDetail() {
   const stale = chair.status !== "sold" && days > STALE_DAYS;
   const lc = landedCost(chair);
   const p = profit(chair);
+  const isSold = chair.status === "sold";
 
   async function doDelete() {
     const { error } = await supabase.from("chairs").delete().eq("id", chairId);
@@ -47,6 +71,59 @@ function ChairDetail() {
     toast.success("Chair deleted");
     qc.invalidateQueries({ queryKey: ["chairs"] });
     nav({ to: "/app/inventory" });
+  }
+
+  async function sendSaleEmail(updated: any) {
+    const { data: profileRow } = await supabase
+      .from("profiles").select("notification_email,email,full_name")
+      .eq("id", updated.created_by).maybeSingle();
+    const recipient = profileRow?.notification_email || profileRow?.email;
+    if (!recipient) return;
+    const lcCalc = landedCost(updated);
+    const profitCalc = Number(updated.sold_price ?? 0) - lcCalc;
+    const daysHeld = updated.date_sold ? daysBetween(updated.date_acquired, updated.date_sold) : null;
+    await sendTransactionalEmail({
+      templateName: "chair-sale",
+      recipientEmail: recipient,
+      idempotencyKey: `chair-sale-${updated.id}-${updated.date_sold}`,
+      templateData: {
+        sku: updated.sku, brand: updated.brand, model: updated.model || "",
+        soldBy: profileRow?.full_name || profileRow?.email || "Team",
+        soldAt: new Date().toLocaleString("en-CA", { timeZone: "America/Toronto" }),
+        dateSold: updated.date_sold,
+        buyerName: updated.buyer_name || "",
+        paymentMethod: updated.payment_method || "other",
+        soldPrice: Number(updated.sold_price ?? 0),
+        landedCost: lcCalc,
+        profit: profitCalc,
+        daysHeld,
+        saleNotes: updated.sale_notes || "",
+      },
+    });
+  }
+
+  async function doSell() {
+    const price = parseFloat(sellForm.sold_price);
+    if (!price || price <= 0) return toast.error("Enter a valid sold price");
+    setSellBusy(true);
+    const updates = {
+      status: "sold" as const,
+      sold_price: price,
+      date_sold: sellForm.date_sold,
+      payment_method: sellForm.payment_method,
+      buyer_name: sellForm.buyer_name || null,
+      sale_notes: sellForm.sale_notes || null,
+    };
+    const { data: updated, error } = await supabase.from("chairs").update(updates).eq("id", chairId).select().maybeSingle();
+    if (error) { setSellBusy(false); return toast.error(error.message); }
+    toast.success("Marked as sold — sending proof of sale email");
+    qc.invalidateQueries({ queryKey: ["chair", chairId] });
+    qc.invalidateQueries({ queryKey: ["chairs"] });
+    if (updated) {
+      try { await sendSaleEmail(updated); } catch (e: any) { toast.error("Email failed: " + (e?.message ?? "unknown")); }
+    }
+    setSellBusy(false);
+    setSellOpen(false);
   }
 
   return (
@@ -59,12 +136,30 @@ function ChairDetail() {
       </div>
       <p className="text-sm text-muted-foreground mt-1">{chair.condition ?? "—"} · {chair.storage_unit ?? "—"} · {days} days held</p>
 
+      {!isSold && canEdit && (
+        <div className="mt-4">
+          <Button onClick={() => setSellOpen(true)} className="w-full h-12 bg-[oklch(0.55_0.16_152)] hover:bg-[oklch(0.5_0.16_152)] text-white">
+            <DollarSign className="h-5 w-5 mr-1.5" /> Mark as Sold
+          </Button>
+        </div>
+      )}
+
       <Section title="Flip Summary">
         <KV k="Bought from" v={SOURCE_LABELS[chair.source] ?? chair.source} />
         <KV k="Days in storage" v={`${days} days`} />
-        <KV k={chair.status === "sold" ? "Profit made" : "Projected profit"} v={cad(p)} bold tone={p >= 0 ? "success" : "destructive"} />
+        <KV k={isSold ? "Profit made" : "Projected profit"} v={cad(p)} bold tone={p >= 0 ? "success" : "destructive"} />
         <KV k="Profit / day held" v={days > 0 ? cad(p / days) : "—"} />
       </Section>
+
+      {isSold && (
+        <Section title="Sale">
+          <KV k="Sold price" v={cad(chair.sold_price)} bold tone="success" />
+          <KV k="Date sold" v={chair.date_sold ?? "—"} />
+          <KV k="Payment" v={chair.payment_method ? (PAYMENT_LABELS[chair.payment_method] ?? chair.payment_method) : "—"} />
+          {chair.buyer_name && <KV k="Buyer" v={chair.buyer_name} />}
+          {chair.sale_notes && <Note label="Sale notes" text={chair.sale_notes} />}
+        </Section>
+      )}
 
       <Section title="Financials">
         <KV k="Purchase" v={cad(chair.purchase_price)} />
@@ -74,7 +169,7 @@ function ChairDetail() {
         <KV k="Landed cost" v={cad(lc)} bold />
         <KV k="List price" v={chair.list_price ? cad(chair.list_price) : "—"} />
         <KV k="Sold price" v={chair.sold_price ? cad(chair.sold_price) : "—"} />
-        <KV k={chair.status === "sold" ? "Profit" : "Projected profit"} v={cad(p)} bold tone={p >= 0 ? "success" : "destructive"} />
+        <KV k={isSold ? "Profit" : "Projected profit"} v={cad(p)} bold tone={p >= 0 ? "success" : "destructive"} />
       </Section>
 
       {(chair.trip_km || chair.trip_start) && (
@@ -113,6 +208,52 @@ function ChairDetail() {
         description="This permanently removes the chair and all its data. This cannot be undone."
         onConfirm={doDelete}
       />
+
+      <Dialog open={sellOpen} onOpenChange={setSellOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Mark as sold</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="sp">Sold price (CAD) *</Label>
+              <Input id="sp" type="number" inputMode="decimal" step="0.01" placeholder="650.00"
+                value={sellForm.sold_price} onChange={(e) => setSellForm({ ...sellForm, sold_price: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="pm">Payment method *</Label>
+              <Select value={sellForm.payment_method} onValueChange={(v) => setSellForm({ ...sellForm, payment_method: v })}>
+                <SelectTrigger id="pm"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {PAYMENT_METHODS.map((p) => <SelectItem key={p.v} value={p.v}>{p.l}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="ds">Date sold</Label>
+                <Input id="ds" type="date" value={sellForm.date_sold} onChange={(e) => setSellForm({ ...sellForm, date_sold: e.target.value })} />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="bn">Buyer name</Label>
+                <Input id="bn" placeholder="Optional" value={sellForm.buyer_name} onChange={(e) => setSellForm({ ...sellForm, buyer_name: e.target.value })} />
+              </div>
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="sn">Sale notes</Label>
+              <Textarea id="sn" rows={3} placeholder="Pickup details, anything to remember…"
+                value={sellForm.sale_notes} onChange={(e) => setSellForm({ ...sellForm, sale_notes: e.target.value })} />
+            </div>
+            <p className="text-xs text-muted-foreground">A proof-of-sale email will be sent to your notification email.</p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSellOpen(false)} disabled={sellBusy}>Cancel</Button>
+            <Button onClick={doSell} disabled={sellBusy} className="bg-[oklch(0.55_0.16_152)] hover:bg-[oklch(0.5_0.16_152)] text-white">
+              {sellBusy ? "Saving…" : "Confirm sale"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
