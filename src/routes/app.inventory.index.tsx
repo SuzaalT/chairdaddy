@@ -6,12 +6,16 @@ import { useTeam } from "@/hooks/use-team";
 import { ChairCard } from "@/components/ChairCard";
 import { SwipeToDelete } from "@/components/SwipeToDelete";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { ListChairSheet } from "@/components/ListChairSheet";
 import { Input } from "@/components/ui/input";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Sparkles } from "lucide-react";
 import { daysBetween, STALE_DAYS } from "@/lib/cra";
 import { cn } from "@/lib/utils";
 import { usePermission, PERMISSIONS } from "@/hooks/use-permission";
 import { toast } from "sonner";
+import type { Database } from "@/integrations/supabase/types";
+
+type Chair = Database["public"]["Tables"]["chairs"]["Row"];
 
 type Filter = "all" | "in_stock" | "listed" | "stale" | "sold";
 
