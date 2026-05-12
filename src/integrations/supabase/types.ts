@@ -17,6 +17,7 @@ export type Database = {
       chairs: {
         Row: {
           brand: string
+          buyer_contact: string | null
           buyer_name: string | null
           condition: string | null
           created_at: string
@@ -53,6 +54,7 @@ export type Database = {
         }
         Insert: {
           brand: string
+          buyer_contact?: string | null
           buyer_name?: string | null
           condition?: string | null
           created_at?: string
@@ -89,6 +91,7 @@ export type Database = {
         }
         Update: {
           brand?: string
+          buyer_contact?: string | null
           buyer_name?: string | null
           condition?: string | null
           created_at?: string
