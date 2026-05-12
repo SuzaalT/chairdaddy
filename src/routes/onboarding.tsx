@@ -19,6 +19,7 @@ function Onboarding() {
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
+  const [preview, setPreview] = useState<{ team_name: string; role: string } | null>(null);
 
   if (!user) return <Navigate to="/login" />;
   if (team) return <Navigate to="/app" />;
@@ -33,6 +34,13 @@ function Onboarding() {
     toast.success("Team created");
     nav({ to: "/app" });
   }
+  async function lookup(c: string) {
+    if (c.length < 4) { setPreview(null); return; }
+    const { data } = await supabase.rpc("lookup_invite", { _code: c.toUpperCase() });
+    const row = (data as any[] | null)?.[0];
+    if (row) setPreview({ team_name: row.team_name, role: row.role });
+    else setPreview(null);
+  }
   async function joinTeam(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -43,6 +51,7 @@ function Onboarding() {
     toast.success("Joined team");
     nav({ to: "/app" });
   }
+
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6 py-10 bg-background">
@@ -67,8 +76,13 @@ function Onboarding() {
           <form onSubmit={joinTeam} className="mt-6 space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="code">Invite code</Label>
-              <Input id="code" required value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="ABC123" className="uppercase tracking-widest" />
+              <Input id="code" required value={code} onChange={(e) => { const v = e.target.value.toUpperCase(); setCode(v); lookup(v); }} placeholder="ABC123" className="uppercase tracking-widest" />
             </div>
+            {preview && (
+              <div className="rounded-lg bg-muted p-3 text-sm">
+                Joining <span className="font-semibold">{preview.team_name}</span> as <span className="font-semibold capitalize">{preview.role.replace("_", "-")}</span>
+              </div>
+            )}
             <Button disabled={busy || !code} className="w-full h-11"><Users className="mr-2 h-4 w-4" />Join team</Button>
           </form>
         )}

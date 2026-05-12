@@ -5,7 +5,7 @@ import type { Database } from "@/integrations/supabase/types";
 
 type Chair = Database["public"]["Tables"]["chairs"]["Row"];
 
-export function ChairCard({ chair }: { chair: Chair }) {
+export function ChairCard({ chair, draggable }: { chair: Chair; draggable?: boolean }) {
   const days = chair.status === "sold" && chair.date_sold
     ? daysBetween(chair.date_acquired, chair.date_sold)
     : daysBetween(chair.date_acquired);
@@ -16,7 +16,10 @@ export function ChairCard({ chair }: { chair: Chair }) {
     <Link
       to="/app/inventory/$chairId"
       params={{ chairId: chair.id }}
-      className="block rounded-2xl bg-card border border-border p-4 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-elevated)] transition-shadow"
+      draggable={false}
+      className="block rounded-2xl bg-card border border-border p-4 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-elevated)] transition-shadow select-none"
+      onDragStart={(e) => e.preventDefault()}
+      style={draggable ? { touchAction: "pan-y" } : undefined}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">

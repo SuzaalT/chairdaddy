@@ -4,10 +4,14 @@ import { useState, useMemo, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTeam } from "@/hooks/use-team";
 import { ChairCard } from "@/components/ChairCard";
+import { SwipeToDelete } from "@/components/SwipeToDelete";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { Input } from "@/components/ui/input";
 import { Plus, Search } from "lucide-react";
 import { daysBetween, STALE_DAYS } from "@/lib/cra";
 import { cn } from "@/lib/utils";
+import { usePermission, PERMISSIONS } from "@/hooks/use-permission";
+import { toast } from "sonner";
 
 type Filter = "all" | "in_stock" | "listed" | "stale" | "sold";
 
@@ -16,8 +20,11 @@ export const Route = createFileRoute("/app/inventory")({ component: Inventory })
 function Inventory() {
   const { team } = useTeam();
   const qc = useQueryClient();
+  const canDelete = usePermission(PERMISSIONS.CHAIR_DELETE);
   const [filter, setFilter] = useState<Filter>("all");
   const [q, setQ] = useState("");
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; label: string } | null>(null);
+
   const { data: chairs = [], isLoading } = useQuery({
     queryKey: ["chairs", team?.id],
     enabled: !!team,
@@ -55,6 +62,14 @@ function Inventory() {
       return true;
     });
   }, [chairs, filter, q]);
+
+  async function doDelete() {
+    if (!pendingDelete) return;
+    const { error } = await supabase.from("chairs").delete().eq("id", pendingDelete.id);
+    if (error) toast.error(error.message);
+    else { toast.success("Deleted"); qc.invalidateQueries({ queryKey: ["chairs", team?.id] }); }
+    setPendingDelete(null);
+  }
 
   const filters: { id: Filter; label: string }[] = [
     { id: "all", label: "All" }, { id: "in_stock", label: "In Stock" },
@@ -99,11 +114,26 @@ function Inventory() {
         </div>
       ) : (
         <div className="space-y-3">
-          {filtered.map((c) => <ChairCard key={c.id} chair={c} />)}
+          {filtered.map((c) => (
+            <SwipeToDelete
+              key={c.id}
+              disabled={!canDelete}
+              onDelete={() => setPendingDelete({ id: c.id, label: `${c.brand}${c.model ? " · " + c.model : ""}` })}
+            >
+              <ChairCard chair={c} draggable={canDelete} />
+            </SwipeToDelete>
+          ))}
         </div>
       )}
 
-      {/* FAB */}
+      <ConfirmDialog
+        open={!!pendingDelete}
+        onOpenChange={(v) => !v && setPendingDelete(null)}
+        title={`Delete ${pendingDelete?.label}?`}
+        description="This permanently removes the chair and all its data. This cannot be undone."
+        onConfirm={doDelete}
+      />
+
       <Link to="/app/chair/new" className="fixed bottom-24 right-4 z-30 h-14 w-14 rounded-full bg-primary text-primary-foreground grid place-items-center shadow-[var(--shadow-elevated)] hover:scale-105 transition-transform" aria-label="Add chair">
         <Plus className="h-6 w-6" />
       </Link>

@@ -130,6 +130,7 @@ export type Database = {
           created_at: string
           id: string
           image_url: string | null
+          read_by: string[]
           team_id: string
           user_id: string
         }
@@ -138,6 +139,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          read_by?: string[]
           team_id: string
           user_id: string
         }
@@ -146,6 +148,7 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          read_by?: string[]
           team_id?: string
           user_id?: string
         }
@@ -402,6 +405,41 @@ export type Database = {
           },
         ]
       }
+      role_permissions: {
+        Row: {
+          allowed: boolean
+          id: string
+          permission: string
+          role: Database["public"]["Enums"]["team_role"]
+          team_id: string
+          updated_at: string
+        }
+        Insert: {
+          allowed?: boolean
+          id?: string
+          permission: string
+          role: Database["public"]["Enums"]["team_role"]
+          team_id: string
+          updated_at?: string
+        }
+        Update: {
+          allowed?: boolean
+          id?: string
+          permission?: string
+          role?: Database["public"]["Enums"]["team_role"]
+          team_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       storage_units: {
         Row: {
           created_at: string
@@ -454,6 +492,47 @@ export type Database = {
           reason?: string
         }
         Relationships: []
+      }
+      team_invites: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["team_role"]
+          team_id: string
+          used_count: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["team_role"]
+          team_id: string
+          used_count?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["team_role"]
+          team_id?: string
+          used_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_invites_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       team_members: {
         Row: {
@@ -634,6 +713,13 @@ export type Database = {
     }
     Functions: {
       create_team: { Args: { _name: string }; Returns: string }
+      create_team_invite: {
+        Args: {
+          _role: Database["public"]["Enums"]["team_role"]
+          _team_id: string
+        }
+        Returns: string
+      }
       current_user_team: { Args: never; Returns: string }
       delete_email: {
         Args: { message_id: number; queue_name: string }
@@ -643,11 +729,22 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      has_permission: {
+        Args: { _permission: string; _team_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_team_member: {
         Args: { _team_id: string; _user_id: string }
         Returns: boolean
       }
       join_team_by_code: { Args: { _code: string }; Returns: string }
+      lookup_invite: {
+        Args: { _code: string }
+        Returns: {
+          role: Database["public"]["Enums"]["team_role"]
+          team_name: string
+        }[]
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -665,6 +762,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      seed_role_permissions: { Args: { _team_id: string }; Returns: undefined }
     }
     Enums: {
       chair_source:
@@ -685,7 +783,13 @@ export type Database = {
         | "insurance"
         | "bank_fees"
         | "other"
-      team_role: "owner" | "member"
+      team_role:
+        | "owner"
+        | "member"
+        | "co_owner"
+        | "partner"
+        | "staff"
+        | "viewer"
       vehicle_expense_category:
         | "gas"
         | "insurance"
@@ -844,7 +948,7 @@ export const Constants = {
         "bank_fees",
         "other",
       ],
-      team_role: ["owner", "member"],
+      team_role: ["owner", "member", "co_owner", "partner", "staff", "viewer"],
       vehicle_expense_category: [
         "gas",
         "insurance",
