@@ -1,16 +1,22 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTeam } from "@/hooks/use-team";
 import { Stat } from "@/components/Stat";
 import { cad, daysBetween, HST_THRESHOLD, landedCost, profit, STALE_DAYS } from "@/lib/cra";
-import { TrendingUp, Package, Tag, AlertTriangle, Banknote, Clock, Calendar, BarChart3, ArrowRight } from "lucide-react";
+import { TrendingUp, Package, Tag, AlertTriangle, Banknote, Clock, Calendar, BarChart3, ArrowRight, Sparkles, ChevronRight } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, Tooltip, Cell } from "recharts";
+import { ListChairSheet } from "@/components/ListChairSheet";
+import type { Database } from "@/integrations/supabase/types";
+
+type Chair = Database["public"]["Tables"]["chairs"]["Row"];
 
 export const Route = createFileRoute("/app/")({ component: Dashboard });
 
 function Dashboard() {
   const { team } = useTeam();
+  const [listChair, setListChair] = useState<Chair | null>(null);
   const { data: chairs = [] } = useQuery({
     queryKey: ["chairs", team?.id],
     enabled: !!team,
@@ -23,6 +29,7 @@ function Dashboard() {
 
   const inStock = chairs.filter((c) => c.status !== "sold");
   const sold = chairs.filter((c) => c.status === "sold");
+  const unlisted = chairs.filter((c) => c.status === "in_stock" && !c.date_listed);
   const cashInvested = inStock.reduce((s, c) => s + landedCost(c), 0);
   const totalProfit = sold.reduce((s, c) => s + profit(c), 0);
   const listedValue = chairs.filter((c) => c.status === "listed").reduce((s, c) => s + Number(c.list_price ?? 0), 0);
@@ -59,6 +66,37 @@ function Dashboard() {
   return (
     <div className="px-4 pt-4 pb-8 space-y-5">
       <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+
+      {unlisted.length > 0 && (
+        <div className="rounded-2xl border border-[oklch(0.85_0.12_75)] bg-[oklch(0.97_0.06_85)] p-4 shadow-[var(--shadow-card)]">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="h-4 w-4 text-[oklch(0.5_0.16_60)]" />
+            <h2 className="text-sm font-semibold text-[oklch(0.35_0.16_60)]">Action Required</h2>
+          </div>
+          <p className="text-sm text-[oklch(0.4_0.16_60)] mb-3">
+            {unlisted.length} chair{unlisted.length === 1 ? "" : "s"} need{unlisted.length === 1 ? "s" : ""} to be listed
+          </p>
+          <ul className="space-y-1.5">
+            {unlisted.map((c) => (
+              <li key={c.id}>
+                <button
+                  onClick={() => setListChair(c)}
+                  className="w-full flex items-center justify-between rounded-lg bg-card/80 hover:bg-card border border-[oklch(0.9_0.08_75)] px-3 py-2 text-left transition-colors"
+                >
+                  <span className="min-w-0">
+                    <span className="block text-[11px] font-mono text-muted-foreground">{c.sku}</span>
+                    <span className="block text-sm font-medium truncate">{c.brand}{c.model ? ` · ${c.model}` : ""}</span>
+                  </span>
+                  <span className="flex items-center gap-2 shrink-0 text-xs text-muted-foreground">
+                    {daysBetween(c.date_acquired)}d
+                    <ChevronRight className="h-4 w-4" />
+                  </span>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-3">
         <Stat label="Capital Deployed" value={cad(cashInvested)} hint="sitting in your storage" icon={Banknote} />
@@ -133,6 +171,8 @@ function Dashboard() {
           </ul>
         </div>
       )}
+
+      <ListChairSheet chair={listChair} open={!!listChair} onOpenChange={(v) => !v && setListChair(null)} />
     </div>
   );
 }

@@ -1,0 +1,1 @@
+ALTER TABLE public.chairs ADD COLUMN IF NOT EXISTS listed_platform text;

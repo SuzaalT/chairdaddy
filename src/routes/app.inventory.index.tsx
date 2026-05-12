@@ -6,12 +6,16 @@ import { useTeam } from "@/hooks/use-team";
 import { ChairCard } from "@/components/ChairCard";
 import { SwipeToDelete } from "@/components/SwipeToDelete";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { ListChairSheet } from "@/components/ListChairSheet";
 import { Input } from "@/components/ui/input";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Sparkles } from "lucide-react";
 import { daysBetween, STALE_DAYS } from "@/lib/cra";
 import { cn } from "@/lib/utils";
 import { usePermission, PERMISSIONS } from "@/hooks/use-permission";
 import { toast } from "sonner";
+import type { Database } from "@/integrations/supabase/types";
+
+type Chair = Database["public"]["Tables"]["chairs"]["Row"];
 
 type Filter = "all" | "in_stock" | "listed" | "stale" | "sold";
 
@@ -24,6 +28,7 @@ function Inventory() {
   const [filter, setFilter] = useState<Filter>("all");
   const [q, setQ] = useState("");
   const [pendingDelete, setPendingDelete] = useState<{ id: string; label: string } | null>(null);
+  const [listChair, setListChair] = useState<Chair | null>(null);
 
   const { data: chairs = [], isLoading } = useQuery({
     queryKey: ["chairs", team?.id],
@@ -114,15 +119,27 @@ function Inventory() {
         </div>
       ) : (
         <div className="space-y-3">
-          {filtered.map((c) => (
-            <SwipeToDelete
-              key={c.id}
-              disabled={!canDelete}
-              onDelete={() => setPendingDelete({ id: c.id, label: `${c.brand}${c.model ? " · " + c.model : ""}` })}
-            >
-              <ChairCard chair={c} draggable={canDelete} />
-            </SwipeToDelete>
-          ))}
+          {filtered.map((c) => {
+            const needsListing = c.status === "in_stock" && !c.date_listed;
+            return (
+              <div key={c.id} className="relative">
+                <SwipeToDelete
+                  disabled={!canDelete}
+                  onDelete={() => setPendingDelete({ id: c.id, label: `${c.brand}${c.model ? " · " + c.model : ""}` })}
+                >
+                  <ChairCard chair={c} draggable={canDelete} />
+                </SwipeToDelete>
+                {needsListing && (
+                  <button
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setListChair(c); }}
+                    className="absolute top-3 right-3 z-10 inline-flex items-center gap-1 rounded-full bg-[oklch(0.95_0.08_75)] text-[oklch(0.4_0.16_60)] border border-[oklch(0.85_0.12_75)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide shadow-sm hover:brightness-95"
+                  >
+                    <Sparkles className="h-3 w-3" /> Needs listing
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 
@@ -137,6 +154,8 @@ function Inventory() {
       <Link to="/app/chair/new" className="fixed bottom-24 right-4 z-30 h-14 w-14 rounded-full bg-primary text-primary-foreground grid place-items-center shadow-[var(--shadow-elevated)] hover:scale-105 transition-transform" aria-label="Add chair">
         <Plus className="h-6 w-6" />
       </Link>
+
+      <ListChairSheet chair={listChair} open={!!listChair} onOpenChange={(v) => !v && setListChair(null)} />
     </div>
   );
 }
