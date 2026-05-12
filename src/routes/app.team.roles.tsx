@@ -1,4 +1,4 @@
-import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTeam } from "@/hooks/use-team";
@@ -30,9 +30,8 @@ const PERMS: { id: string; label: string; hint?: string }[] = [
 type Row = { role: string; permission: string; allowed: boolean };
 
 function ManageRoles() {
-  const { team } = useTeam();
+  const { team, loading: teamLoading } = useTeam();
   const isOwner = useIsOwner();
-  const nav = useNavigate();
   const [matrix, setMatrix] = useState<Record<string, Record<string, boolean>>>({});
   const [loading, setLoading] = useState(true);
 
@@ -55,8 +54,9 @@ function ManageRoles() {
     })();
   }, [team]);
 
-  if (!team) return null;
+  if (teamLoading || !team) return <p className="p-6 text-sm text-muted-foreground">Loading…</p>;
   if (!isOwner) return <Navigate to="/app/team" />;
+
 
   async function toggle(role: string, permission: string, value: boolean) {
     setMatrix((prev) => ({ ...prev, [role]: { ...prev[role], [permission]: value } }));

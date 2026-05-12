@@ -1,0 +1,4 @@
+ALTER TABLE public.chairs
+  ADD COLUMN IF NOT EXISTS payment_method TEXT,
+  ADD COLUMN IF NOT EXISTS buyer_name TEXT,
+  ADD COLUMN IF NOT EXISTS sale_notes TEXT;

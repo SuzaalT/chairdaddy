@@ -17,6 +17,7 @@ export type Database = {
       chairs: {
         Row: {
           brand: string
+          buyer_name: string | null
           condition: string | null
           created_at: string
           created_by: string
@@ -29,10 +30,12 @@ export type Database = {
           list_price: number | null
           model: string | null
           notes: string | null
+          payment_method: string | null
           proof_purchase_url: string | null
           purchase_price: number
           receipt_urls: string[] | null
           refurb_cost: number
+          sale_notes: string | null
           sku: string
           sold_price: number | null
           source: Database["public"]["Enums"]["chair_source"]
@@ -50,6 +53,7 @@ export type Database = {
         }
         Insert: {
           brand: string
+          buyer_name?: string | null
           condition?: string | null
           created_at?: string
           created_by: string
@@ -62,10 +66,12 @@ export type Database = {
           list_price?: number | null
           model?: string | null
           notes?: string | null
+          payment_method?: string | null
           proof_purchase_url?: string | null
           purchase_price?: number
           receipt_urls?: string[] | null
           refurb_cost?: number
+          sale_notes?: string | null
           sku: string
           sold_price?: number | null
           source?: Database["public"]["Enums"]["chair_source"]
@@ -83,6 +89,7 @@ export type Database = {
         }
         Update: {
           brand?: string
+          buyer_name?: string | null
           condition?: string | null
           created_at?: string
           created_by?: string
@@ -95,10 +102,12 @@ export type Database = {
           list_price?: number | null
           model?: string | null
           notes?: string | null
+          payment_method?: string | null
           proof_purchase_url?: string | null
           purchase_price?: number
           receipt_urls?: string[] | null
           refurb_cost?: number
+          sale_notes?: string | null
           sku?: string
           sold_price?: number | null
           source?: Database["public"]["Enums"]["chair_source"]
