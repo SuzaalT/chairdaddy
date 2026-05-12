@@ -1,11 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTeam } from "@/hooks/use-team";
 import { Stat } from "@/components/Stat";
 import { cad, daysBetween, HST_THRESHOLD, landedCost, profit, STALE_DAYS } from "@/lib/cra";
-import { TrendingUp, Package, Tag, AlertTriangle, Banknote, Clock, Calendar, BarChart3, ArrowRight } from "lucide-react";
+import { TrendingUp, Package, Tag, AlertTriangle, Banknote, Clock, Calendar, BarChart3, ArrowRight, Sparkles, ChevronRight } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, Tooltip, Cell } from "recharts";
+import { ListChairSheet } from "@/components/ListChairSheet";
+import type { Database } from "@/integrations/supabase/types";
+
+type Chair = Database["public"]["Tables"]["chairs"]["Row"];
 
 export const Route = createFileRoute("/app/")({ component: Dashboard });
 
