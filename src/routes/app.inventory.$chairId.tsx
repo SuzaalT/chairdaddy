@@ -43,7 +43,7 @@ function ChairDetail() {
 
   async function doDelete() {
     const { error } = await supabase.from("chairs").delete().eq("id", chairId);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success("Chair deleted");
     qc.invalidateQueries({ queryKey: ["chairs"] });
     nav({ to: "/app/inventory" });
