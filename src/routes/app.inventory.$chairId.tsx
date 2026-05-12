@@ -44,7 +44,7 @@ function ChairDetail() {
   const [sellOpen, setSellOpen] = useState(false);
   const [sellBusy, setSellBusy] = useState(false);
   const [sellForm, setSellForm] = useState({
-    sold_price: "", payment_method: "etransfer", buyer_name: "",
+    sold_price: "", payment_method: "etransfer", buyer_name: "", buyer_contact: "",
     date_sold: new Date().toISOString().slice(0, 10), sale_notes: "",
   });
 
