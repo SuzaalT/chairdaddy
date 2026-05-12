@@ -154,6 +154,8 @@ function Inventory() {
       <Link to="/app/chair/new" className="fixed bottom-24 right-4 z-30 h-14 w-14 rounded-full bg-primary text-primary-foreground grid place-items-center shadow-[var(--shadow-elevated)] hover:scale-105 transition-transform" aria-label="Add chair">
         <Plus className="h-6 w-6" />
       </Link>
+
+      <ListChairSheet chair={listChair} open={!!listChair} onOpenChange={(v) => !v && setListChair(null)} />
     </div>
   );
 }
