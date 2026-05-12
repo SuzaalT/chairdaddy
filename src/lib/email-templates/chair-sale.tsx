@@ -1,7 +1,12 @@
 import {
-  Body, Container, Head, Heading, Hr, Html, Link, Preview, Section, Text,
+  Body, Button, Container, Head, Heading, Hr, Html, Link, Preview, Section, Text,
 } from '@react-email/components'
 import type { TemplateEntry } from './registry'
+
+interface DownloadFile {
+  url: string
+  label: string
+}
 
 export interface ChairSaleProps {
   sku?: string
@@ -11,12 +16,27 @@ export interface ChairSaleProps {
   soldAt?: string
   dateSold?: string
   buyerName?: string
+  buyerContact?: string
   paymentMethod?: string
   soldPrice?: number
   landedCost?: number
   profit?: number
-  daysHeld?: number
+  daysHeld?: number | null
   saleNotes?: string
+  // Original purchase
+  source?: string
+  dateAcquired?: string
+  purchasePrice?: number
+  transportCost?: number
+  refurbCost?: number
+  helperCost?: number
+  // Condition
+  condition?: string
+  defects?: string
+  workDone?: string
+  // Misc
+  marketplaceUrl?: string
+  downloads?: DownloadFile[]
 }
 
 const cad = (n: number | null | undefined) =>
@@ -24,109 +44,158 @@ const cad = (n: number | null | undefined) =>
 
 const PAYMENT_LABELS: Record<string, string> = {
   cash: 'Cash',
-  etransfer: 'e-Transfer',
-  credit: 'Credit / Debit',
+  etransfer: 'E-Transfer',
+  credit: 'Credit Card',
   paypal: 'PayPal',
+  cheque: 'Cheque',
   other: 'Other',
 }
 
-const Row = ({ label, value }: { label: string; value: React.ReactNode }) => (
+const Row = ({ label, value, mono = true }: { label: string; value: React.ReactNode; mono?: boolean }) => (
   <tr>
     <td style={tdLabel}>{label}</td>
-    <td style={tdValue}>{value ?? '—'}</td>
+    <td style={mono ? tdValueMono : tdValue}>{value ?? '—'}</td>
   </tr>
 )
 
 const ChairSaleEmail = ({
   sku = '', brand = '', model = '',
   soldBy = 'Team', soldAt = '', dateSold = '',
-  buyerName, paymentMethod = 'other',
+  buyerName, buyerContact, paymentMethod = 'other',
   soldPrice = 0, landedCost = 0, profit = 0, daysHeld,
   saleNotes,
-}: ChairSaleProps) => (
-  <Html lang="en" dir="ltr">
-    <Head />
-    <Preview>SOLD {sku} — {cad(soldPrice)} profit {cad(profit)}</Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <Heading style={h1}>PROOF OF SALE — {sku}</Heading>
-        <Text style={subtitle}>
-          Sold by {soldBy} on {soldAt} · Ontario, Canada
-        </Text>
-
-        <Section style={hero}>
-          <Text style={heroLabel}>Sold for</Text>
-          <Text style={heroAmount}>{cad(soldPrice)}</Text>
-          <Text style={heroProfit}>Profit: <strong style={profit >= 0 ? profitGood : profitBad}>{cad(profit)}</strong></Text>
-        </Section>
-
-        <Section style={section}>
-          <Heading as="h2" style={h2}>Sale Details</Heading>
-          <table style={table}><tbody>
-            <Row label="SKU" value={sku} />
-            <Row label="Item" value={`${brand}${model ? ' ' + model : ''}`} />
-            <Row label="Date sold" value={dateSold} />
-            <Row label="Buyer" value={buyerName || '—'} />
-            <Row label="Payment method" value={PAYMENT_LABELS[paymentMethod] ?? paymentMethod} />
-            <Row label="Days held" value={daysHeld != null ? `${daysHeld} days` : '—'} />
-          </tbody></table>
-        </Section>
-
-        <Section style={section}>
-          <Heading as="h2" style={h2}>Profit Summary</Heading>
-          <table style={table}><tbody>
-            <Row label="Sold price" value={cad(soldPrice)} />
-            <Row label="Landed cost" value={cad(landedCost)} />
-            <Row label="Net profit" value={<strong style={profit >= 0 ? profitGood : profitBad}>{cad(profit)}</strong>} />
-          </tbody></table>
-        </Section>
-
-        {saleNotes && (
-          <Section style={section}>
-            <Heading as="h2" style={h2}>Sale Notes</Heading>
-            <Text style={text}>{saleNotes}</Text>
+  source = '', dateAcquired = '',
+  purchasePrice = 0, transportCost = 0, refurbCost = 0, helperCost = 0,
+  condition = '', defects, workDone,
+  marketplaceUrl,
+  downloads = [],
+}: ChairSaleProps) => {
+  const profitPerDay = daysHeld && daysHeld > 0 ? profit / daysHeld : null
+  const roi = landedCost > 0 ? (profit / landedCost) * 100 : null
+  return (
+    <Html lang="en" dir="ltr">
+      <Head />
+      <Preview>SALE CONFIRMED {sku} — {cad(profit)} profit</Preview>
+      <Body style={main}>
+        <Container style={container}>
+          <Section style={header}>
+            <Heading style={h1}>SALE CONFIRMED</Heading>
+            <Text style={headerSub}>{brand}{model ? ` ${model}` : ''} · {sku}</Text>
+            <Text style={headerMeta}>{dateSold} · Ontario, Canada</Text>
           </Section>
-        )}
 
-        <Hr style={hr} />
-        <Text style={footer}>
-          chairdaddy · automated proof of sale · <Link href="https://marketplaceflip.com" style={link}>marketplaceflip.com</Link>
-        </Text>
-      </Container>
-    </Body>
-  </Html>
-)
+          <Section style={section}>
+            <Heading as="h2" style={h2}>Sale Details</Heading>
+            <table style={table}><tbody>
+              <Row label="Sold Price" value={cad(soldPrice)} />
+              <Row label="Payment Method" value={PAYMENT_LABELS[paymentMethod] ?? paymentMethod} mono={false} />
+              <Row label="Buyer Name" value={buyerName || 'Not recorded'} mono={false} />
+              <Row label="Buyer Contact" value={buyerContact || 'Not recorded'} mono={false} />
+            </tbody></table>
+          </Section>
+
+          <Section style={section}>
+            <Heading as="h2" style={h2}>Profit Summary</Heading>
+            <table style={table}><tbody>
+              <Row label="Sold Price" value={cad(soldPrice)} />
+              <Row label="Total Landed Cost" value={cad(landedCost)} />
+              <Row label="Net Profit" value={<strong style={profit >= 0 ? profitGood : profitBad}>{cad(profit)}</strong>} />
+              <Row label="Days in Stock" value={daysHeld != null ? `${daysHeld} days` : '—'} />
+              <Row label="Profit Per Day" value={profitPerDay != null ? cad(profitPerDay) : '—'} />
+              <Row label="Return on Capital" value={roi != null ? `${roi.toFixed(1)}%` : '—'} />
+            </tbody></table>
+          </Section>
+
+          <Section style={section}>
+            <Heading as="h2" style={h2}>Original Purchase</Heading>
+            <table style={table}><tbody>
+              <Row label="Source" value={source || '—'} mono={false} />
+              <Row label="Date Acquired" value={dateAcquired || '—'} />
+              <Row label="Purchase Price" value={cad(purchasePrice)} />
+              <Row label="Transport In" value={cad(transportCost)} />
+              <Row label="Refurb / Parts" value={cad(refurbCost)} />
+              <Row label="Helper Cost" value={cad(helperCost)} />
+            </tbody></table>
+          </Section>
+
+          <Section style={section}>
+            <Heading as="h2" style={h2}>Condition at Sale</Heading>
+            <table style={table}><tbody>
+              <Row label="Condition" value={condition || '—'} mono={false} />
+              <Row label="Defects noted" value={defects || 'None'} mono={false} />
+              <Row label="Work done" value={workDone || 'None'} mono={false} />
+            </tbody></table>
+          </Section>
+
+          {saleNotes && (
+            <Section style={section}>
+              <Heading as="h2" style={h2}>Sale Notes</Heading>
+              <Text style={text}>{saleNotes}</Text>
+            </Section>
+          )}
+
+          {marketplaceUrl && (
+            <Section style={section}>
+              <Heading as="h2" style={h2}>Original Listing</Heading>
+              <Link href={marketplaceUrl} style={link}>{marketplaceUrl}</Link>
+            </Section>
+          )}
+
+          {downloads.length > 0 && (
+            <Section style={section}>
+              <Heading as="h2" style={h2}>Proof Files & Receipts</Heading>
+              <Text style={text}>Click to download (links expire in 7 days):</Text>
+              {downloads.map((d, i) => (
+                <Button key={i} href={d.url} style={button}>⬇ {d.label}</Button>
+              ))}
+            </Section>
+          )}
+
+          <Hr style={hr} />
+          <Text style={footer}>
+            Logged by {soldBy} on {soldAt}<br />
+            ChairFlip Business Manager · Ontario, Canada · <Link href="https://marketplaceflip.com" style={link}>marketplaceflip.com</Link>
+          </Text>
+        </Container>
+      </Body>
+    </Html>
+  )
+}
 
 export const template = {
   component: ChairSaleEmail,
   subject: (data: Record<string, any>) =>
-    `SOLD — ${data.sku ?? ''} · ${data.brand ?? ''}${data.model ? ' ' + data.model : ''} · ${cad(data.soldPrice)}`.trim(),
+    `✅ Sale Confirmed: ${data.sku ?? ''} — ${data.brand ?? ''} · ${cad(data.profit)} profit`.trim(),
   displayName: 'Chair sale',
   previewData: {
     sku: 'CF-1234', brand: 'Herman Miller', model: 'Aeron',
     soldBy: 'Suzaal', soldAt: '2026-05-12 14:32', dateSold: '2026-05-12',
-    buyerName: 'Alex P.', paymentMethod: 'etransfer',
+    buyerName: 'Alex P.', buyerContact: '416-555-1234', paymentMethod: 'etransfer',
     soldPrice: 650, landedCost: 273, profit: 377, daysHeld: 12,
-    saleNotes: 'Picked up at storage unit, paid in full.',
+    source: 'Facebook Marketplace', dateAcquired: '2026-04-30',
+    purchasePrice: 200, transportCost: 18, refurbCost: 25, helperCost: 30,
+    condition: 'Good', defects: 'Minor scuff on armrest', workDone: 'Cleaned, lubed gas lift',
+    saleNotes: 'Buyer picked up, no issues.',
+    downloads: [{ url: '#', label: 'proof-CF-1234.jpg' }],
   },
 } satisfies TemplateEntry
 
 const main = { backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif', color: '#111111' }
 const container = { padding: '24px', maxWidth: '640px', margin: '0 auto' }
-const h1 = { fontSize: '20px', fontWeight: 700 as const, color: '#111111', margin: '0 0 4px', letterSpacing: '0.5px' }
-const subtitle = { fontSize: '12px', color: '#6b7280', margin: '0 0 24px' }
-const hero = { backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '20px', textAlign: 'center' as const, margin: '0 0 24px' }
-const heroLabel = { fontSize: '11px', color: '#15803d', textTransform: 'uppercase' as const, letterSpacing: '1px', margin: '0 0 4px' }
-const heroAmount = { fontSize: '32px', fontWeight: 700 as const, color: '#14532d', margin: '0 0 4px' }
-const heroProfit = { fontSize: '13px', color: '#374151', margin: 0 }
+const header = { backgroundColor: '#111111', color: '#ffffff', padding: '20px 24px', borderRadius: '8px', margin: '0 0 24px' }
+const h1 = { fontSize: '20px', fontWeight: 700 as const, color: '#ffffff', margin: '0 0 6px', letterSpacing: '1px' }
+const headerSub = { fontSize: '14px', color: '#e5e7eb', margin: '0 0 4px', fontWeight: 600 as const }
+const headerMeta = { fontSize: '11px', color: '#9ca3af', margin: 0, textTransform: 'uppercase' as const, letterSpacing: '0.5px' }
+const section = { margin: '0 0 24px' }
+const h2 = { fontSize: '13px', fontWeight: 700 as const, color: '#111111', margin: '0 0 8px', textTransform: 'uppercase' as const, letterSpacing: '0.8px', borderBottom: '2px solid #111111', paddingBottom: '4px' }
+const table = { width: '100%', borderCollapse: 'collapse' as const, fontSize: '13px' }
+const tdLabel = { padding: '6px 8px', color: '#6b7280', width: '45%', verticalAlign: 'top' as const, borderBottom: '1px solid #f3f4f6' }
+const tdValue = { padding: '6px 8px', color: '#111111', borderBottom: '1px solid #f3f4f6' }
+const tdValueMono = { padding: '6px 8px', color: '#111111', borderBottom: '1px solid #f3f4f6', fontFamily: 'Menlo, Consolas, monospace', fontSize: '13px' }
 const profitGood = { color: '#15803d' }
 const profitBad = { color: '#dc2626' }
-const section = { margin: '0 0 24px' }
-const h2 = { fontSize: '14px', fontWeight: 700 as const, color: '#111111', margin: '0 0 8px', textTransform: 'uppercase' as const, letterSpacing: '0.5px' }
-const table = { width: '100%', borderCollapse: 'collapse' as const, fontSize: '13px' }
-const tdLabel = { padding: '6px 8px', color: '#6b7280', width: '40%', verticalAlign: 'top' as const, borderBottom: '1px solid #f3f4f6' }
-const tdValue = { padding: '6px 8px', color: '#111111', borderBottom: '1px solid #f3f4f6' }
 const text = { fontSize: '13px', color: '#374151', lineHeight: '1.5', margin: '0 0 8px' }
+const button = { display: 'block', backgroundColor: '#3b6ef8', color: '#ffffff', padding: '10px 16px', borderRadius: '6px', fontSize: '13px', fontWeight: 600 as const, textDecoration: 'none', margin: '8px 0', textAlign: 'center' as const }
 const hr = { borderColor: '#e5e7eb', margin: '24px 0 12px' }
-const footer = { fontSize: '11px', color: '#9ca3af', textAlign: 'center' as const, margin: 0 }
+const footer = { fontSize: '11px', color: '#9ca3af', textAlign: 'center' as const, margin: 0, lineHeight: '1.6' }
 const link = { color: '#3b6ef8', textDecoration: 'none' }
