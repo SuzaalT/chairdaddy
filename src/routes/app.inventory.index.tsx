@@ -119,15 +119,27 @@ function Inventory() {
         </div>
       ) : (
         <div className="space-y-3">
-          {filtered.map((c) => (
-            <SwipeToDelete
-              key={c.id}
-              disabled={!canDelete}
-              onDelete={() => setPendingDelete({ id: c.id, label: `${c.brand}${c.model ? " · " + c.model : ""}` })}
-            >
-              <ChairCard chair={c} draggable={canDelete} />
-            </SwipeToDelete>
-          ))}
+          {filtered.map((c) => {
+            const needsListing = c.status === "in_stock" && !c.date_listed;
+            return (
+              <div key={c.id} className="relative">
+                <SwipeToDelete
+                  disabled={!canDelete}
+                  onDelete={() => setPendingDelete({ id: c.id, label: `${c.brand}${c.model ? " · " + c.model : ""}` })}
+                >
+                  <ChairCard chair={c} draggable={canDelete} />
+                </SwipeToDelete>
+                {needsListing && (
+                  <button
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setListChair(c); }}
+                    className="absolute top-3 right-3 z-10 inline-flex items-center gap-1 rounded-full bg-[oklch(0.95_0.08_75)] text-[oklch(0.4_0.16_60)] border border-[oklch(0.85_0.12_75)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide shadow-sm hover:brightness-95"
+                  >
+                    <Sparkles className="h-3 w-3" /> Needs listing
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
       )}
 
