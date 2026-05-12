@@ -199,6 +199,7 @@ function ChairDetail() {
           <KV k="Date sold" v={chair.date_sold ?? "—"} />
           <KV k="Payment" v={chair.payment_method ? (PAYMENT_LABELS[chair.payment_method] ?? chair.payment_method) : "—"} />
           {chair.buyer_name && <KV k="Buyer" v={chair.buyer_name} />}
+          {chair.buyer_contact && <KV k="Buyer contact" v={chair.buyer_contact} />}
           {chair.sale_notes && <Note label="Sale notes" text={chair.sale_notes} />}
         </Section>
       )}
