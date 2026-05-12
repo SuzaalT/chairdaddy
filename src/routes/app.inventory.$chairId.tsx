@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { usePermission, PERMISSIONS } from "@/hooks/use-permission";
+import { usePermission, useIsOwner, PERMISSIONS } from "@/hooks/use-permission";
 import { sendTransactionalEmail } from "@/lib/email/send";
 import { toast } from "sonner";
 
@@ -38,8 +38,9 @@ function ChairDetail() {
   const { chairId } = Route.useParams();
   const nav = useNavigate();
   const qc = useQueryClient();
-  const canDelete = usePermission(PERMISSIONS.CHAIR_DELETE);
-  const canEdit = usePermission(PERMISSIONS.CHAIR_EDIT);
+  const isOwner = useIsOwner();
+  const canDelete = usePermission(PERMISSIONS.CHAIR_DELETE) || isOwner;
+  const canEdit = usePermission(PERMISSIONS.CHAIR_EDIT) || isOwner;
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [sellOpen, setSellOpen] = useState(false);
   const [sellBusy, setSellBusy] = useState(false);
