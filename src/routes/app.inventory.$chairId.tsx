@@ -1,9 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { StatusBadge } from "@/components/StatusBadge";
 import { cad, daysBetween, landedCost, profit, STALE_DAYS } from "@/lib/cra";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, Trash2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { usePermission, PERMISSIONS } from "@/hooks/use-permission";
+import { toast } from "sonner";
 
 const SOURCE_LABELS: Record<string, string> = {
   fb_marketplace: "Facebook Marketplace", kijiji: "Kijiji",
@@ -15,6 +20,10 @@ export const Route = createFileRoute("/app/inventory/$chairId")({ component: Cha
 function ChairDetail() {
   const { chairId } = Route.useParams();
   const nav = useNavigate();
+  const qc = useQueryClient();
+  const canDelete = usePermission(PERMISSIONS.CHAIR_DELETE);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+
   const { data: chair, isLoading } = useQuery({
     queryKey: ["chair", chairId],
     queryFn: async () => {
@@ -31,6 +40,14 @@ function ChairDetail() {
   const stale = chair.status !== "sold" && days > STALE_DAYS;
   const lc = landedCost(chair);
   const p = profit(chair);
+
+  async function doDelete() {
+    const { error } = await supabase.from("chairs").delete().eq("id", chairId);
+    if (error) return toast.error(error.message);
+    toast.success("Chair deleted");
+    qc.invalidateQueries({ queryKey: ["chairs"] });
+    nav({ to: "/app/inventory" });
+  }
 
   return (
     <div className="px-4 pt-4 pb-24">
@@ -80,6 +97,22 @@ function ChairDetail() {
         {chair.date_listed && <KV k="Listed" v={chair.date_listed} />}
         {chair.date_sold && <KV k="Sold" v={chair.date_sold} />}
       </Section>
+
+      {canDelete && (
+        <div className="mt-6">
+          <Button variant="outline" className="w-full border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground" onClick={() => setConfirmOpen(true)}>
+            <Trash2 className="h-4 w-4 mr-2" /> Delete chair
+          </Button>
+        </div>
+      )}
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title={`Delete ${chair.brand}${chair.model ? " · " + chair.model : ""}?`}
+        description="This permanently removes the chair and all its data. This cannot be undone."
+        onConfirm={doDelete}
+      />
     </div>
   );
 }
