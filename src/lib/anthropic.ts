@@ -1,6 +1,6 @@
 // Client-side Anthropic API helper using user's stored key.
 // Uses the official Messages API with a CORS-friendly header.
-const MODEL = "claude-sonnet-4-20250514";
+const MODEL = "claude-opus-4-5";
 
 export type AnthropicContent =
   | { type: "text"; text: string }
