@@ -29,6 +29,7 @@ export type Database = {
           helper_cost: number
           id: string
           list_price: number | null
+          listed_platform: string | null
           model: string | null
           notes: string | null
           payment_method: string | null
@@ -66,6 +67,7 @@ export type Database = {
           helper_cost?: number
           id?: string
           list_price?: number | null
+          listed_platform?: string | null
           model?: string | null
           notes?: string | null
           payment_method?: string | null
@@ -103,6 +105,7 @@ export type Database = {
           helper_cost?: number
           id?: string
           list_price?: number | null
+          listed_platform?: string | null
           model?: string | null
           notes?: string | null
           payment_method?: string | null
