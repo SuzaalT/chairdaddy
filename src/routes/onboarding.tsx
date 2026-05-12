@@ -76,8 +76,13 @@ function Onboarding() {
           <form onSubmit={joinTeam} className="mt-6 space-y-4">
             <div className="space-y-1.5">
               <Label htmlFor="code">Invite code</Label>
-              <Input id="code" required value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="ABC123" className="uppercase tracking-widest" />
+              <Input id="code" required value={code} onChange={(e) => { const v = e.target.value.toUpperCase(); setCode(v); lookup(v); }} placeholder="ABC123" className="uppercase tracking-widest" />
             </div>
+            {preview && (
+              <div className="rounded-lg bg-muted p-3 text-sm">
+                Joining <span className="font-semibold">{preview.team_name}</span> as <span className="font-semibold capitalize">{preview.role.replace("_", "-")}</span>
+              </div>
+            )}
             <Button disabled={busy || !code} className="w-full h-11"><Users className="mr-2 h-4 w-4" />Join team</Button>
           </form>
         )}
