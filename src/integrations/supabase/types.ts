@@ -685,7 +685,13 @@ export type Database = {
         | "insurance"
         | "bank_fees"
         | "other"
-      team_role: "owner" | "member"
+      team_role:
+        | "owner"
+        | "member"
+        | "co_owner"
+        | "partner"
+        | "staff"
+        | "viewer"
       vehicle_expense_category:
         | "gas"
         | "insurance"
@@ -844,7 +850,7 @@ export const Constants = {
         "bank_fees",
         "other",
       ],
-      team_role: ["owner", "member"],
+      team_role: ["owner", "member", "co_owner", "partner", "staff", "viewer"],
       vehicle_expense_category: [
         "gas",
         "insurance",
