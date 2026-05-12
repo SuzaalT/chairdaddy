@@ -19,6 +19,7 @@ function Onboarding() {
   const [name, setName] = useState("");
   const [code, setCode] = useState("");
   const [busy, setBusy] = useState(false);
+  const [preview, setPreview] = useState<{ team_name: string; role: string } | null>(null);
 
   if (!user) return <Navigate to="/login" />;
   if (team) return <Navigate to="/app" />;
@@ -33,6 +34,13 @@ function Onboarding() {
     toast.success("Team created");
     nav({ to: "/app" });
   }
+  async function lookup(c: string) {
+    if (c.length < 4) { setPreview(null); return; }
+    const { data } = await supabase.rpc("lookup_invite", { _code: c.toUpperCase() });
+    const row = (data as any[] | null)?.[0];
+    if (row) setPreview({ team_name: row.team_name, role: row.role });
+    else setPreview(null);
+  }
   async function joinTeam(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -43,6 +51,7 @@ function Onboarding() {
     toast.success("Joined team");
     nav({ to: "/app" });
   }
+
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6 py-10 bg-background">
