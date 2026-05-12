@@ -171,6 +171,8 @@ function Dashboard() {
           </ul>
         </div>
       )}
+
+      <ListChairSheet chair={listChair} open={!!listChair} onOpenChange={(v) => !v && setListChair(null)} />
     </div>
   );
 }
