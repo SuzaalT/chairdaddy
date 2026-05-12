@@ -1,0 +1,1 @@
+ALTER TABLE public.chairs ADD COLUMN IF NOT EXISTS buyer_contact text;
