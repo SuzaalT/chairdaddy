@@ -16,6 +16,7 @@ export const Route = createFileRoute("/app/")({ component: Dashboard });
 
 function Dashboard() {
   const { team } = useTeam();
+  const [listChair, setListChair] = useState<Chair | null>(null);
   const { data: chairs = [] } = useQuery({
     queryKey: ["chairs", team?.id],
     enabled: !!team,
@@ -28,6 +29,7 @@ function Dashboard() {
 
   const inStock = chairs.filter((c) => c.status !== "sold");
   const sold = chairs.filter((c) => c.status === "sold");
+  const unlisted = chairs.filter((c) => c.status === "in_stock" && !c.date_listed);
   const cashInvested = inStock.reduce((s, c) => s + landedCost(c), 0);
   const totalProfit = sold.reduce((s, c) => s + profit(c), 0);
   const listedValue = chairs.filter((c) => c.status === "listed").reduce((s, c) => s + Number(c.list_price ?? 0), 0);
