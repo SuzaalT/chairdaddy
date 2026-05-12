@@ -15,7 +15,7 @@ import { toast } from "sonner";
 
 type Filter = "all" | "in_stock" | "listed" | "stale" | "sold";
 
-export const Route = createFileRoute("/app/inventory")({ component: Inventory });
+export const Route = createFileRoute("/app/inventory/")({ component: Inventory });
 
 function Inventory() {
   const { team } = useTeam();
