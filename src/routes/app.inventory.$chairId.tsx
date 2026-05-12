@@ -283,8 +283,13 @@ function ChairDetail() {
               </div>
             </div>
             <div className="space-y-1.5">
+              <Label htmlFor="bc">Buyer contact</Label>
+              <Input id="bc" placeholder="Phone or FB profile (optional)"
+                value={sellForm.buyer_contact} onChange={(e) => setSellForm({ ...sellForm, buyer_contact: e.target.value })} />
+            </div>
+            <div className="space-y-1.5">
               <Label htmlFor="sn">Sale notes</Label>
-              <Textarea id="sn" rows={3} placeholder="Pickup details, anything to remember…"
+              <Textarea id="sn" rows={3} placeholder="e.g. buyer picked up, no issues"
                 value={sellForm.sale_notes} onChange={(e) => setSellForm({ ...sellForm, sale_notes: e.target.value })} />
             </div>
             <p className="text-xs text-muted-foreground">A proof-of-sale email will be sent to your notification email.</p>
