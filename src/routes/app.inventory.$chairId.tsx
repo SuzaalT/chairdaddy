@@ -23,9 +23,10 @@ const SOURCE_LABELS: Record<string, string> = {
 
 const PAYMENT_METHODS = [
   { v: "cash", l: "Cash" },
-  { v: "etransfer", l: "e-Transfer" },
-  { v: "credit", l: "Credit / Debit" },
+  { v: "etransfer", l: "E-Transfer" },
   { v: "paypal", l: "PayPal" },
+  { v: "credit", l: "Credit Card" },
+  { v: "cheque", l: "Cheque" },
   { v: "other", l: "Other" },
 ];
 
