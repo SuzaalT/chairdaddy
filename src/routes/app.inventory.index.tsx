@@ -28,6 +28,7 @@ function Inventory() {
   const [filter, setFilter] = useState<Filter>("all");
   const [q, setQ] = useState("");
   const [pendingDelete, setPendingDelete] = useState<{ id: string; label: string } | null>(null);
+  const [listChair, setListChair] = useState<Chair | null>(null);
 
   const { data: chairs = [], isLoading } = useQuery({
     queryKey: ["chairs", team?.id],
