@@ -74,6 +74,33 @@ function ChairDetail() {
     nav({ to: "/app/inventory" });
   }
 
+  async function buildDownloads(c: any): Promise<{ url: string; label: string }[]> {
+    const out: { url: string; label: string }[] = [];
+    const sku = c.sku || "chair";
+    // Proof of purchase (private bucket → signed URL)
+    if (c.proof_purchase_url) {
+      try {
+        const path = c.proof_purchase_url.split("/proof-docs/")[1];
+        if (path) {
+          const { data } = await supabase.storage.from("proof-docs").createSignedUrl(path, 60 * 60 * 24 * 7);
+          if (data?.signedUrl) {
+            const ext = path.split(".").pop() || "jpg";
+            out.push({ url: data.signedUrl, label: `proof-${sku}.${ext}` });
+          }
+        } else {
+          out.push({ url: c.proof_purchase_url, label: `proof-${sku}` });
+        }
+      } catch { /* ignore */ }
+    }
+    // Receipts (public bucket)
+    const receipts: string[] = Array.isArray(c.receipt_urls) ? c.receipt_urls : [];
+    receipts.forEach((url, i) => {
+      const ext = (url.split("?")[0].split(".").pop() || "jpg").slice(0, 4);
+      out.push({ url, label: `receipt-${i + 1}-${sku}.${ext}` });
+    });
+    return out;
+  }
+
   async function sendSaleEmail(updated: any) {
     const { data: profileRow } = await supabase
       .from("profiles").select("notification_email,email,full_name")
@@ -83,6 +110,7 @@ function ChairDetail() {
     const lcCalc = landedCost(updated);
     const profitCalc = Number(updated.sold_price ?? 0) - lcCalc;
     const daysHeld = updated.date_sold ? daysBetween(updated.date_acquired, updated.date_sold) : null;
+    const downloads = await buildDownloads(updated);
     await sendTransactionalEmail({
       templateName: "chair-sale",
       recipientEmail: recipient,
@@ -93,12 +121,23 @@ function ChairDetail() {
         soldAt: new Date().toLocaleString("en-CA", { timeZone: "America/Toronto" }),
         dateSold: updated.date_sold,
         buyerName: updated.buyer_name || "",
+        buyerContact: updated.buyer_contact || "",
         paymentMethod: updated.payment_method || "other",
         soldPrice: Number(updated.sold_price ?? 0),
         landedCost: lcCalc,
         profit: profitCalc,
         daysHeld,
         saleNotes: updated.sale_notes || "",
+        source: SOURCE_LABELS[updated.source] ?? updated.source ?? "",
+        dateAcquired: updated.date_acquired || "",
+        purchasePrice: Number(updated.purchase_price ?? 0),
+        transportCost: Number(updated.transport_cost ?? 0),
+        refurbCost: Number(updated.refurb_cost ?? 0),
+        helperCost: Number(updated.helper_cost ?? 0),
+        condition: updated.condition || "",
+        defects: updated.defects || "",
+        workDone: updated.work_done || "",
+        downloads,
       },
     });
   }
@@ -113,11 +152,13 @@ function ChairDetail() {
       date_sold: sellForm.date_sold,
       payment_method: sellForm.payment_method,
       buyer_name: sellForm.buyer_name || null,
+      buyer_contact: sellForm.buyer_contact || null,
       sale_notes: sellForm.sale_notes || null,
     };
     const { data: updated, error } = await supabase.from("chairs").update(updates).eq("id", chairId).select().maybeSingle();
     if (error) { setSellBusy(false); return toast.error(error.message); }
-    toast.success("Marked as sold — sending proof of sale email");
+    const profitNum = updated ? Number(updated.sold_price ?? 0) - landedCost(updated) : 0;
+    toast.success(`Sale confirmed — ${cad(profitNum)} profit on this flip 🎉`);
     qc.invalidateQueries({ queryKey: ["chair", chairId] });
     qc.invalidateQueries({ queryKey: ["chairs"] });
     if (updated) {
