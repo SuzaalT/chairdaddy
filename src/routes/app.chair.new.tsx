@@ -14,8 +14,81 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { ChevronLeft, Save, MapPin, AlertTriangle } from "lucide-react";
 import { estimateDrivingKm, variancePct, VARIANCE_FLAG_PCT } from "@/lib/distance";
+import { sendTransactionalEmail } from "@/lib/email/send";
 
 export const Route = createFileRoute("/app/chair/new")({ component: NewChair });
+
+const SOURCE_LABELS: Record<string, string> = {
+  fb_marketplace: "Facebook Marketplace", kijiji: "Kijiji",
+  estate_sale: "Estate Sale / Garage Sale", supplier: "Supplier / Wholesale", other: "Other",
+};
+
+function pathFromPublicUrl(publicUrl: string): string | null {
+  const m = publicUrl.match(/\/storage\/v1\/object\/public\/proof-docs\/(.+)$/);
+  return m ? decodeURIComponent(m[1]) : null;
+}
+
+async function signedDownload(publicUrl: string, label: string) {
+  const path = pathFromPublicUrl(publicUrl);
+  if (!path) return null;
+  const { data } = await supabase.storage.from("proof-docs").createSignedUrl(path, 60 * 60 * 24 * 7);
+  return data?.signedUrl ? { url: data.signedUrl, label } : null;
+}
+
+async function sendChairEmail(
+  chair: any, sku: string, proofUrl: string | null, receiptUrls: string[]
+) {
+  const { data: profile } = await supabase
+    .from("profiles").select("notification_email,email,full_name")
+    .eq("id", chair.created_by).maybeSingle();
+  const recipient = profile?.notification_email || profile?.email;
+  if (!recipient) return;
+
+  const downloads: { url: string; label: string }[] = [];
+  if (proofUrl) {
+    const d = await signedDownload(proofUrl, `proof-of-purchase-${sku}.jpg`);
+    if (d) downloads.push(d);
+  }
+  for (let i = 0; i < receiptUrls.length; i++) {
+    const d = await signedDownload(receiptUrls[i], `repair-receipt-${i + 1}-${sku}.jpg`);
+    if (d) downloads.push(d);
+  }
+
+  const lc = (Number(chair.purchase_price) || 0) + (Number(chair.helper_cost) || 0)
+    + (Number(chair.refurb_cost) || 0) + (Number(chair.transport_cost) || 0);
+  const est = chair.list_price != null ? Number(chair.list_price) - lc : null;
+  const tripV = chair.trip_km && chair.trip_estimated_km
+    ? variancePct(Number(chair.trip_km), Number(chair.trip_estimated_km)) : null;
+
+  await sendTransactionalEmail({
+    templateName: "chair-record",
+    recipientEmail: recipient,
+    idempotencyKey: `chair-record-${chair.id}`,
+    templateData: {
+      sku, loggedBy: profile?.full_name || profile?.email || "Team",
+      loggedAt: new Date(chair.created_at).toLocaleString("en-CA", { timeZone: "America/Toronto" }),
+      brand: chair.brand, model: chair.model || "",
+      source: SOURCE_LABELS[chair.source] ?? chair.source,
+      dateAcquired: chair.date_acquired,
+      storageUnit: chair.storage_unit, condition: chair.condition, status: chair.status,
+      defects: chair.defects, workDone: chair.work_done,
+      purchasePrice: Number(chair.purchase_price) || 0,
+      helperCost: Number(chair.helper_cost) || 0,
+      refurbCost: Number(chair.refurb_cost) || 0,
+      transportCost: Number(chair.transport_cost) || 0,
+      landedCost: lc,
+      listPrice: chair.list_price != null ? Number(chair.list_price) : null,
+      estProfit: est,
+      tripStart: chair.trip_start, tripEnd: chair.trip_end,
+      tripKm: chair.trip_km != null ? Number(chair.trip_km) : null,
+      tripEstimatedKm: chair.trip_estimated_km != null ? Number(chair.trip_estimated_km) : null,
+      tripVariancePct: tripV,
+      tripFlagged: tripV != null && Math.abs(tripV) > VARIANCE_FLAG_PCT,
+      notes: chair.notes,
+      downloads,
+    },
+  });
+}
 
 const SOURCES = [
   { v: "fb_marketplace", l: "Facebook Marketplace" }, { v: "kijiji", l: "Kijiji" },
