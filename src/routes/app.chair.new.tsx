@@ -118,11 +118,8 @@ function NewChair() {
       }
 
       toast.success(`Saved ${sku}`);
-      // Email send (best effort — requires Lovable Emails domain setup)
-      fetch("/api/public/chair-saved-email", {
-        method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({ chairId: chair.id }),
-      }).catch(() => {});
+      // Email send (best effort)
+      sendChairEmail(chair, sku, proofUrl, receiptUrls).catch((e) => console.warn('email failed', e));
       nav({ to: "/app/inventory" });
     } catch (e) {
       toast.error((e as Error).message);
