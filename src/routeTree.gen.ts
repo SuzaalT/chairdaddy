@@ -20,8 +20,8 @@ import { Route as AppTeamRouteImport } from './routes/app.team'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppLogbookRouteImport } from './routes/app.logbook'
 import { Route as AppListingAiRouteImport } from './routes/app.listing-ai'
-import { Route as AppInventoryRouteImport } from './routes/app.inventory'
 import { Route as AppExpensesRouteImport } from './routes/app.expenses'
+import { Route as AppInventoryIndexRouteImport } from './routes/app.inventory.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as AppTeamRolesRouteImport } from './routes/app.team.roles'
 import { Route as AppInventoryChairIdRouteImport } from './routes/app.inventory.$chairId'
@@ -85,14 +85,14 @@ const AppListingAiRoute = AppListingAiRouteImport.update({
   path: '/listing-ai',
   getParentRoute: () => AppRoute,
 } as any)
-const AppInventoryRoute = AppInventoryRouteImport.update({
-  id: '/inventory',
-  path: '/inventory',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppExpensesRoute = AppExpensesRouteImport.update({
   id: '/expenses',
   path: '/expenses',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInventoryIndexRoute = AppInventoryIndexRouteImport.update({
+  id: '/inventory/',
+  path: '/inventory/',
   getParentRoute: () => AppRoute,
 } as any)
 const LovableEmailSuppressionRoute = LovableEmailSuppressionRouteImport.update({
@@ -106,9 +106,9 @@ const AppTeamRolesRoute = AppTeamRolesRouteImport.update({
   getParentRoute: () => AppTeamRoute,
 } as any)
 const AppInventoryChairIdRoute = AppInventoryChairIdRouteImport.update({
-  id: '/$chairId',
-  path: '/$chairId',
-  getParentRoute: () => AppInventoryRoute,
+  id: '/inventory/$chairId',
+  path: '/inventory/$chairId',
+  getParentRoute: () => AppRoute,
 } as any)
 const AppChairNewRoute = AppChairNewRouteImport.update({
   id: '/chair/new',
@@ -141,7 +141,6 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/app/expenses': typeof AppExpensesRoute
-  '/app/inventory': typeof AppInventoryRouteWithChildren
   '/app/listing-ai': typeof AppListingAiRoute
   '/app/logbook': typeof AppLogbookRoute
   '/app/settings': typeof AppSettingsRoute
@@ -152,6 +151,7 @@ export interface FileRoutesByFullPath {
   '/app/inventory/$chairId': typeof AppInventoryChairIdRoute
   '/app/team/roles': typeof AppTeamRolesRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/app/inventory/': typeof AppInventoryIndexRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -162,7 +162,6 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/app/expenses': typeof AppExpensesRoute
-  '/app/inventory': typeof AppInventoryRouteWithChildren
   '/app/listing-ai': typeof AppListingAiRoute
   '/app/logbook': typeof AppLogbookRoute
   '/app/settings': typeof AppSettingsRoute
@@ -173,6 +172,7 @@ export interface FileRoutesByTo {
   '/app/inventory/$chairId': typeof AppInventoryChairIdRoute
   '/app/team/roles': typeof AppTeamRolesRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/app/inventory': typeof AppInventoryIndexRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -185,7 +185,6 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/app/expenses': typeof AppExpensesRoute
-  '/app/inventory': typeof AppInventoryRouteWithChildren
   '/app/listing-ai': typeof AppListingAiRoute
   '/app/logbook': typeof AppLogbookRoute
   '/app/settings': typeof AppSettingsRoute
@@ -196,6 +195,7 @@ export interface FileRoutesById {
   '/app/inventory/$chairId': typeof AppInventoryChairIdRoute
   '/app/team/roles': typeof AppTeamRolesRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
+  '/app/inventory/': typeof AppInventoryIndexRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -209,7 +209,6 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/unsubscribe'
     | '/app/expenses'
-    | '/app/inventory'
     | '/app/listing-ai'
     | '/app/logbook'
     | '/app/settings'
@@ -220,6 +219,7 @@ export interface FileRouteTypes {
     | '/app/inventory/$chairId'
     | '/app/team/roles'
     | '/lovable/email/suppression'
+    | '/app/inventory/'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -230,7 +230,6 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/unsubscribe'
     | '/app/expenses'
-    | '/app/inventory'
     | '/app/listing-ai'
     | '/app/logbook'
     | '/app/settings'
@@ -241,6 +240,7 @@ export interface FileRouteTypes {
     | '/app/inventory/$chairId'
     | '/app/team/roles'
     | '/lovable/email/suppression'
+    | '/app/inventory'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -252,7 +252,6 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/unsubscribe'
     | '/app/expenses'
-    | '/app/inventory'
     | '/app/listing-ai'
     | '/app/logbook'
     | '/app/settings'
@@ -263,6 +262,7 @@ export interface FileRouteTypes {
     | '/app/inventory/$chairId'
     | '/app/team/roles'
     | '/lovable/email/suppression'
+    | '/app/inventory/'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -360,18 +360,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppListingAiRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/inventory': {
-      id: '/app/inventory'
-      path: '/inventory'
-      fullPath: '/app/inventory'
-      preLoaderRoute: typeof AppInventoryRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/app/expenses': {
       id: '/app/expenses'
       path: '/expenses'
       fullPath: '/app/expenses'
       preLoaderRoute: typeof AppExpensesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/inventory/': {
+      id: '/app/inventory/'
+      path: '/inventory'
+      fullPath: '/app/inventory/'
+      preLoaderRoute: typeof AppInventoryIndexRouteImport
       parentRoute: typeof AppRoute
     }
     '/lovable/email/suppression': {
@@ -390,10 +390,10 @@ declare module '@tanstack/react-router' {
     }
     '/app/inventory/$chairId': {
       id: '/app/inventory/$chairId'
-      path: '/$chairId'
+      path: '/inventory/$chairId'
       fullPath: '/app/inventory/$chairId'
       preLoaderRoute: typeof AppInventoryChairIdRouteImport
-      parentRoute: typeof AppInventoryRoute
+      parentRoute: typeof AppRoute
     }
     '/app/chair/new': {
       id: '/app/chair/new'
@@ -426,18 +426,6 @@ declare module '@tanstack/react-router' {
   }
 }
 
-interface AppInventoryRouteChildren {
-  AppInventoryChairIdRoute: typeof AppInventoryChairIdRoute
-}
-
-const AppInventoryRouteChildren: AppInventoryRouteChildren = {
-  AppInventoryChairIdRoute: AppInventoryChairIdRoute,
-}
-
-const AppInventoryRouteWithChildren = AppInventoryRoute._addFileChildren(
-  AppInventoryRouteChildren,
-)
-
 interface AppTeamRouteChildren {
   AppTeamRolesRoute: typeof AppTeamRolesRoute
 }
@@ -451,24 +439,26 @@ const AppTeamRouteWithChildren =
 
 interface AppRouteChildren {
   AppExpensesRoute: typeof AppExpensesRoute
-  AppInventoryRoute: typeof AppInventoryRouteWithChildren
   AppListingAiRoute: typeof AppListingAiRoute
   AppLogbookRoute: typeof AppLogbookRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppTeamRoute: typeof AppTeamRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
   AppChairNewRoute: typeof AppChairNewRoute
+  AppInventoryChairIdRoute: typeof AppInventoryChairIdRoute
+  AppInventoryIndexRoute: typeof AppInventoryIndexRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppExpensesRoute: AppExpensesRoute,
-  AppInventoryRoute: AppInventoryRouteWithChildren,
   AppListingAiRoute: AppListingAiRoute,
   AppLogbookRoute: AppLogbookRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppTeamRoute: AppTeamRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
   AppChairNewRoute: AppChairNewRoute,
+  AppInventoryChairIdRoute: AppInventoryChairIdRoute,
+  AppInventoryIndexRoute: AppInventoryIndexRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
