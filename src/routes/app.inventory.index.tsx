@@ -135,14 +135,44 @@ function Inventory() {
         ))}
       </div>
 
+      {brand && (
+        <button onClick={() => setBrand(null)} className="flex items-center gap-1 text-sm text-muted-foreground mb-3 hover:text-foreground">
+          <ChevronLeft className="h-4 w-4" /> All brands
+        </button>
+      )}
+
       {isLoading ? (
         <p className="text-center text-muted-foreground text-sm py-12">Loading…</p>
+      ) : !brand ? (
+        brandFolders.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-muted-foreground text-sm">No chairs in stock. Hit the marketplaces and add your first flip.</p>
+            <Link to="/app/chair/new" className="inline-flex items-center mt-4 rounded-full bg-primary text-primary-foreground px-4 py-2 text-sm font-medium">
+              <Plus className="h-4 w-4 mr-1.5" /> Add your first flip
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            {brandFolders.map((b) => (
+              <button
+                key={b.name}
+                onClick={() => setBrand(b.name)}
+                className="flex items-center gap-3 rounded-2xl bg-card border border-border p-4 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-elevated)] transition-shadow text-left"
+              >
+                <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary grid place-items-center shrink-0">
+                  <Folder className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-semibold truncate">{b.name}</p>
+                  <p className="text-xs text-muted-foreground">{b.count} item{b.count === 1 ? "" : "s"}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        )
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
-          <p className="text-muted-foreground text-sm">No chairs in stock. Hit the marketplaces and add your first flip.</p>
-          <Link to="/app/chair/new" className="inline-flex items-center mt-4 rounded-full bg-primary text-primary-foreground px-4 py-2 text-sm font-medium">
-            <Plus className="h-4 w-4 mr-1.5" /> Add your first flip
-          </Link>
+          <p className="text-muted-foreground text-sm">No chairs match.</p>
         </div>
       ) : (
         <div className="space-y-3">
