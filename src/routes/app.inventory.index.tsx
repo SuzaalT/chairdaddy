@@ -111,8 +111,10 @@ function Inventory() {
   return (
     <div className="px-4 pt-4 pb-24">
       <div className="flex items-center justify-between mb-3">
-        <h1 className="text-2xl font-bold tracking-tight">My Stock</h1>
-        <span className="text-xs text-muted-foreground">{filtered.length} of {chairs.length}</span>
+        <h1 className="text-2xl font-bold tracking-tight">{brand ?? "My Stock"}</h1>
+        <span className="text-xs text-muted-foreground">
+          {brand ? `${filtered.length} item${filtered.length === 1 ? "" : "s"}` : `${brandFolders.length} brand${brandFolders.length === 1 ? "" : "s"} · ${chairs.length} total`}
+        </span>
       </div>
 
       <div className="relative mb-3">
