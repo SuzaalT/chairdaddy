@@ -32,7 +32,7 @@ function Dashboard() {
   const unlisted = chairs.filter((c) => c.status === "in_stock" && !c.date_listed);
   const cashInvested = inStock.reduce((s, c) => s + landedCost(c), 0);
   const totalProfit = sold.reduce((s, c) => s + profit(c), 0);
-  const listedValue = chairs.filter((c) => c.status === "listed").reduce((s, c) => s + Number(c.list_price ?? 0), 0);
+  const listedValue = inStock.reduce((s, c) => s + Number(c.list_price ?? 0), 0);
   const stale = inStock.filter((c) => daysBetween(c.date_acquired) > STALE_DAYS);
 
   const avgProfit = sold.length ? totalProfit / sold.length : 0;
@@ -101,7 +101,7 @@ function Dashboard() {
       <div className="grid grid-cols-2 gap-3">
         <Stat label="Capital Deployed" value={cad(cashInvested)} hint="sitting in your storage" icon={Banknote} />
         <Stat label="Total Profit" value={cad(totalProfit)} hint={`${sold.length} sold`} tone="success" icon={TrendingUp} />
-        <Stat label="Active Listings Value" value={cad(listedValue)} hint="Active listings" icon={Tag} />
+        <Stat label="Inventory Value" value={cad(listedValue)} hint="all unsold list prices" icon={Tag} />
         <Stat label="Stale Chairs" value={stale.length} hint=">30 days" tone={stale.length ? "warning" : "default"} icon={Clock} />
       </div>
 

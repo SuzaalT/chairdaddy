@@ -4,7 +4,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { StatusBadge } from "@/components/StatusBadge";
 import { cad, daysBetween, landedCost, profit, STALE_DAYS } from "@/lib/cra";
-import { ChevronLeft, Trash2, DollarSign } from "lucide-react";
+import { ChevronLeft, Trash2, DollarSign, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -179,10 +179,15 @@ function ChairDetail() {
       </div>
       <p className="text-sm text-muted-foreground mt-1">{chair.condition ?? "—"} · {chair.storage_unit ?? "—"} · {days} days held</p>
 
-      {!isSold && canEdit && (
-        <div className="mt-4">
-          <Button onClick={() => setSellOpen(true)} className="w-full h-12 bg-[oklch(0.55_0.16_152)] hover:bg-[oklch(0.5_0.16_152)] text-white">
-            <DollarSign className="h-5 w-5 mr-1.5" /> Mark as Sold
+      {canEdit && (
+        <div className="mt-4 flex gap-2">
+          {!isSold && (
+            <Button onClick={() => setSellOpen(true)} className="flex-1 h-12 bg-[oklch(0.55_0.16_152)] hover:bg-[oklch(0.5_0.16_152)] text-white">
+              <DollarSign className="h-5 w-5 mr-1.5" /> Mark as Sold
+            </Button>
+          )}
+          <Button variant="outline" onClick={() => nav({ to: "/app/chair/$chairId/edit", params: { chairId } })} className="h-12">
+            <Pencil className="h-4 w-4 mr-1.5" /> Edit
           </Button>
         </div>
       )}

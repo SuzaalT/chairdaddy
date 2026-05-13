@@ -1,17 +1,20 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { StatusBadge } from "./StatusBadge";
-import { cad, daysBetween, landedCost, profit, STALE_DAYS } from "@/lib/cra";
+import { cad, daysBetween, landedCost, needsAttention, profit, STALE_DAYS } from "@/lib/cra";
+import { Pencil, AlertTriangle } from "lucide-react";
 import type { Database } from "@/integrations/supabase/types";
 
 type Chair = Database["public"]["Tables"]["chairs"]["Row"];
 
 export function ChairCard({ chair, draggable }: { chair: Chair; draggable?: boolean }) {
+  const nav = useNavigate();
   const days = chair.status === "sold" && chair.date_sold
     ? daysBetween(chair.date_acquired, chair.date_sold)
     : daysBetween(chair.date_acquired);
   const stale = chair.status !== "sold" && days > STALE_DAYS;
   const lc = landedCost(chair);
   const p = profit(chair);
+  const attention = needsAttention(chair);
   return (
     <Link
       to="/app/inventory/$chairId"
@@ -29,8 +32,24 @@ export function ChairCard({ chair, draggable }: { chair: Chair; draggable?: bool
             {chair.storage_unit ?? "—"} · {chair.condition ?? "—"} · {days}d
           </p>
         </div>
-        <StatusBadge status={chair.status} stale={stale} />
+        <div className="flex items-center gap-2 shrink-0">
+          <StatusBadge status={chair.status} stale={stale} />
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); nav({ to: "/app/chair/$chairId/edit", params: { chairId: chair.id } }); }}
+            aria-label="Edit chair"
+            className="h-8 w-8 grid place-items-center rounded-full border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
+      {attention && (
+        <div className="mt-3 flex items-center gap-2 rounded-lg border border-[oklch(0.85_0.12_75)] bg-[oklch(0.97_0.06_85)] px-3 py-2 text-xs font-medium text-[oklch(0.4_0.16_60)]">
+          <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+          <span>⚠️ Hey, this {chair.brand.toLowerCase().includes("chair") ? chair.brand : "chair"} needs work please do it!</span>
+        </div>
+      )}
       <div className="mt-3 grid grid-cols-3 gap-2 text-center">
         <div className="rounded-lg bg-muted/60 py-1.5">
           <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Cost</p>

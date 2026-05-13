@@ -29,6 +29,7 @@ import { Route as AppChairNewRouteImport } from './routes/app.chair.new'
 import { Route as LovableEmailTransactionalSendRouteImport } from './routes/lovable/email/transactional/send'
 import { Route as LovableEmailTransactionalPreviewRouteImport } from './routes/lovable/email/transactional/preview'
 import { Route as LovableEmailQueueProcessRouteImport } from './routes/lovable/email/queue/process'
+import { Route as AppChairChairIdEditRouteImport } from './routes/app.chair.$chairId.edit'
 
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
@@ -133,6 +134,11 @@ const LovableEmailQueueProcessRoute =
     path: '/lovable/email/queue/process',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AppChairChairIdEditRoute = AppChairChairIdEditRouteImport.update({
+  id: '/chair/$chairId/edit',
+  path: '/chair/$chairId/edit',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -152,6 +158,7 @@ export interface FileRoutesByFullPath {
   '/app/team/roles': typeof AppTeamRolesRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/app/inventory/': typeof AppInventoryIndexRoute
+  '/app/chair/$chairId/edit': typeof AppChairChairIdEditRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -173,6 +180,7 @@ export interface FileRoutesByTo {
   '/app/team/roles': typeof AppTeamRolesRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/app/inventory': typeof AppInventoryIndexRoute
+  '/app/chair/$chairId/edit': typeof AppChairChairIdEditRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -196,6 +204,7 @@ export interface FileRoutesById {
   '/app/team/roles': typeof AppTeamRolesRoute
   '/lovable/email/suppression': typeof LovableEmailSuppressionRoute
   '/app/inventory/': typeof AppInventoryIndexRoute
+  '/app/chair/$chairId/edit': typeof AppChairChairIdEditRoute
   '/lovable/email/queue/process': typeof LovableEmailQueueProcessRoute
   '/lovable/email/transactional/preview': typeof LovableEmailTransactionalPreviewRoute
   '/lovable/email/transactional/send': typeof LovableEmailTransactionalSendRoute
@@ -220,6 +229,7 @@ export interface FileRouteTypes {
     | '/app/team/roles'
     | '/lovable/email/suppression'
     | '/app/inventory/'
+    | '/app/chair/$chairId/edit'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -241,6 +251,7 @@ export interface FileRouteTypes {
     | '/app/team/roles'
     | '/lovable/email/suppression'
     | '/app/inventory'
+    | '/app/chair/$chairId/edit'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -263,6 +274,7 @@ export interface FileRouteTypes {
     | '/app/team/roles'
     | '/lovable/email/suppression'
     | '/app/inventory/'
+    | '/app/chair/$chairId/edit'
     | '/lovable/email/queue/process'
     | '/lovable/email/transactional/preview'
     | '/lovable/email/transactional/send'
@@ -423,6 +435,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LovableEmailQueueProcessRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/app/chair/$chairId/edit': {
+      id: '/app/chair/$chairId/edit'
+      path: '/chair/$chairId/edit'
+      fullPath: '/app/chair/$chairId/edit'
+      preLoaderRoute: typeof AppChairChairIdEditRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
@@ -447,6 +466,7 @@ interface AppRouteChildren {
   AppChairNewRoute: typeof AppChairNewRoute
   AppInventoryChairIdRoute: typeof AppInventoryChairIdRoute
   AppInventoryIndexRoute: typeof AppInventoryIndexRoute
+  AppChairChairIdEditRoute: typeof AppChairChairIdEditRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -459,6 +479,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppChairNewRoute: AppChairNewRoute,
   AppInventoryChairIdRoute: AppInventoryChairIdRoute,
   AppInventoryIndexRoute: AppInventoryIndexRoute,
+  AppChairChairIdEditRoute: AppChairChairIdEditRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

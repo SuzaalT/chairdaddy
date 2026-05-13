@@ -28,3 +28,8 @@ export function tripDeduction(km: number, roundTrip: boolean) {
 export function tripKmTotal(km: number, roundTrip: boolean) {
   return Number(km ?? 0) * (roundTrip ? 2 : 1);
 }
+
+export function needsAttention(c: { defects?: string | null; work_done?: string | null; notes?: string | null; condition?: string | null }) {
+  const text = `${c.defects ?? ""} ${c.work_done ?? ""} ${c.notes ?? ""} ${c.condition ?? ""}`.toLowerCase();
+  return /needs\s+(work|cleaning|repair|fixing)/.test(text);
+}
