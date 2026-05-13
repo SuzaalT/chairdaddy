@@ -7,6 +7,7 @@ import type { Database } from "@/integrations/supabase/types";
 type Chair = Database["public"]["Tables"]["chairs"]["Row"];
 
 export function ChairCard({ chair, draggable }: { chair: Chair; draggable?: boolean }) {
+  const nav = useNavigate();
   const days = chair.status === "sold" && chair.date_sold
     ? daysBetween(chair.date_acquired, chair.date_sold)
     : daysBetween(chair.date_acquired);
