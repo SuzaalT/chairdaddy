@@ -53,6 +53,7 @@ function Inventory() {
 
   const filtered = useMemo(() => {
     return chairs.filter((c) => {
+      if (brand && c.brand !== brand) return false;
       if (filter === "in_stock" && c.status !== "in_stock") return false;
       if (filter === "listed" && c.status !== "listed") return false;
       if (filter === "sold" && c.status !== "sold") return false;
@@ -67,6 +68,31 @@ function Inventory() {
       }
       return true;
     });
+  }, [chairs, filter, q, brand]);
+
+  // Brand folders — derived from current filter (status/stale) + search query, ignoring selected brand
+  const brandFolders = useMemo(() => {
+    const matches = chairs.filter((c) => {
+      if (filter === "in_stock" && c.status !== "in_stock") return false;
+      if (filter === "listed" && c.status !== "listed") return false;
+      if (filter === "sold" && c.status !== "sold") return false;
+      if (filter === "stale") {
+        if (c.status === "sold") return false;
+        if (daysBetween(c.date_acquired) <= STALE_DAYS) return false;
+      }
+      if (q) {
+        const t = q.toLowerCase();
+        const hay = [c.sku, c.brand, c.model, c.notes, c.condition, c.storage_unit].filter(Boolean).join(" ").toLowerCase();
+        if (!hay.includes(t)) return false;
+      }
+      return true;
+    });
+    const counts = matches.reduce<Record<string, number>>((acc, c) => {
+      const b = c.brand || "Unknown";
+      acc[b] = (acc[b] ?? 0) + 1;
+      return acc;
+    }, {});
+    return Object.entries(counts).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
   }, [chairs, filter, q]);
 
   async function doDelete() {
