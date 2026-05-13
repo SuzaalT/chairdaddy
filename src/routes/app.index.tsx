@@ -101,7 +101,7 @@ function Dashboard() {
       <div className="grid grid-cols-2 gap-3">
         <Stat label="Capital Deployed" value={cad(cashInvested)} hint="sitting in your storage" icon={Banknote} />
         <Stat label="Total Profit" value={cad(totalProfit)} hint={`${sold.length} sold`} tone="success" icon={TrendingUp} />
-        <Stat label="Active Listings Value" value={cad(listedValue)} hint="Active listings" icon={Tag} />
+        <Stat label="Inventory Value" value={cad(listedValue)} hint="all unsold list prices" icon={Tag} />
         <Stat label="Stale Chairs" value={stale.length} hint=">30 days" tone={stale.length ? "warning" : "default"} icon={Clock} />
       </div>
 
