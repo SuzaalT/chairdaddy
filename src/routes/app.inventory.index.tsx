@@ -8,7 +8,7 @@ import { SwipeToDelete } from "@/components/SwipeToDelete";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ListChairSheet } from "@/components/ListChairSheet";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Sparkles } from "lucide-react";
+import { Plus, Search, Sparkles, Folder, ChevronLeft } from "lucide-react";
 import { daysBetween, STALE_DAYS } from "@/lib/cra";
 import { cn } from "@/lib/utils";
 import { usePermission, PERMISSIONS } from "@/hooks/use-permission";
