@@ -27,6 +27,7 @@ function Inventory() {
   const canDelete = usePermission(PERMISSIONS.CHAIR_DELETE);
   const [filter, setFilter] = useState<Filter>("all");
   const [q, setQ] = useState("");
+  const [brand, setBrand] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{ id: string; label: string } | null>(null);
   const [listChair, setListChair] = useState<Chair | null>(null);
 
