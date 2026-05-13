@@ -4,7 +4,7 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { StatusBadge } from "@/components/StatusBadge";
 import { cad, daysBetween, landedCost, profit, STALE_DAYS } from "@/lib/cra";
-import { ChevronLeft, Trash2, DollarSign } from "lucide-react";
+import { ChevronLeft, Trash2, DollarSign, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
