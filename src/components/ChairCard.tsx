@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { StatusBadge } from "./StatusBadge";
 import { cad, daysBetween, landedCost, needsAttention, profit, STALE_DAYS } from "@/lib/cra";
 import { Pencil, AlertTriangle } from "lucide-react";
