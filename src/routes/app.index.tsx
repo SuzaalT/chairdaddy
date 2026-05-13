@@ -32,7 +32,7 @@ function Dashboard() {
   const unlisted = chairs.filter((c) => c.status === "in_stock" && !c.date_listed);
   const cashInvested = inStock.reduce((s, c) => s + landedCost(c), 0);
   const totalProfit = sold.reduce((s, c) => s + profit(c), 0);
-  const listedValue = chairs.filter((c) => c.status === "listed").reduce((s, c) => s + Number(c.list_price ?? 0), 0);
+  const listedValue = inStock.reduce((s, c) => s + Number(c.list_price ?? 0), 0);
   const stale = inStock.filter((c) => daysBetween(c.date_acquired) > STALE_DAYS);
 
   const avgProfit = sold.length ? totalProfit / sold.length : 0;
