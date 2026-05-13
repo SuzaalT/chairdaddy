@@ -8,7 +8,7 @@ import { SwipeToDelete } from "@/components/SwipeToDelete";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ListChairSheet } from "@/components/ListChairSheet";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Sparkles } from "lucide-react";
+import { Plus, Search, Sparkles, Folder, ChevronLeft } from "lucide-react";
 import { daysBetween, STALE_DAYS } from "@/lib/cra";
 import { cn } from "@/lib/utils";
 import { usePermission, PERMISSIONS } from "@/hooks/use-permission";
@@ -27,6 +27,7 @@ function Inventory() {
   const canDelete = usePermission(PERMISSIONS.CHAIR_DELETE);
   const [filter, setFilter] = useState<Filter>("all");
   const [q, setQ] = useState("");
+  const [brand, setBrand] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{ id: string; label: string } | null>(null);
   const [listChair, setListChair] = useState<Chair | null>(null);
 
@@ -52,6 +53,7 @@ function Inventory() {
 
   const filtered = useMemo(() => {
     return chairs.filter((c) => {
+      if (brand && c.brand !== brand) return false;
       if (filter === "in_stock" && c.status !== "in_stock") return false;
       if (filter === "listed" && c.status !== "listed") return false;
       if (filter === "sold" && c.status !== "sold") return false;
@@ -66,6 +68,31 @@ function Inventory() {
       }
       return true;
     });
+  }, [chairs, filter, q, brand]);
+
+  // Brand folders — derived from current filter (status/stale) + search query, ignoring selected brand
+  const brandFolders = useMemo(() => {
+    const matches = chairs.filter((c) => {
+      if (filter === "in_stock" && c.status !== "in_stock") return false;
+      if (filter === "listed" && c.status !== "listed") return false;
+      if (filter === "sold" && c.status !== "sold") return false;
+      if (filter === "stale") {
+        if (c.status === "sold") return false;
+        if (daysBetween(c.date_acquired) <= STALE_DAYS) return false;
+      }
+      if (q) {
+        const t = q.toLowerCase();
+        const hay = [c.sku, c.brand, c.model, c.notes, c.condition, c.storage_unit].filter(Boolean).join(" ").toLowerCase();
+        if (!hay.includes(t)) return false;
+      }
+      return true;
+    });
+    const counts = matches.reduce<Record<string, number>>((acc, c) => {
+      const b = c.brand || "Unknown";
+      acc[b] = (acc[b] ?? 0) + 1;
+      return acc;
+    }, {});
+    return Object.entries(counts).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
   }, [chairs, filter, q]);
 
   async function doDelete() {
@@ -84,8 +111,10 @@ function Inventory() {
   return (
     <div className="px-4 pt-4 pb-24">
       <div className="flex items-center justify-between mb-3">
-        <h1 className="text-2xl font-bold tracking-tight">My Stock</h1>
-        <span className="text-xs text-muted-foreground">{filtered.length} of {chairs.length}</span>
+        <h1 className="text-2xl font-bold tracking-tight">{brand ?? "My Stock"}</h1>
+        <span className="text-xs text-muted-foreground">
+          {brand ? `${filtered.length} item${filtered.length === 1 ? "" : "s"}` : `${brandFolders.length} brand${brandFolders.length === 1 ? "" : "s"} · ${chairs.length} total`}
+        </span>
       </div>
 
       <div className="relative mb-3">
@@ -108,14 +137,44 @@ function Inventory() {
         ))}
       </div>
 
+      {brand && (
+        <button onClick={() => setBrand(null)} className="flex items-center gap-1 text-sm text-muted-foreground mb-3 hover:text-foreground">
+          <ChevronLeft className="h-4 w-4" /> All brands
+        </button>
+      )}
+
       {isLoading ? (
         <p className="text-center text-muted-foreground text-sm py-12">Loading…</p>
+      ) : !brand ? (
+        brandFolders.length === 0 ? (
+          <div className="text-center py-16">
+            <p className="text-muted-foreground text-sm">No chairs in stock. Hit the marketplaces and add your first flip.</p>
+            <Link to="/app/chair/new" className="inline-flex items-center mt-4 rounded-full bg-primary text-primary-foreground px-4 py-2 text-sm font-medium">
+              <Plus className="h-4 w-4 mr-1.5" /> Add your first flip
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            {brandFolders.map((b) => (
+              <button
+                key={b.name}
+                onClick={() => setBrand(b.name)}
+                className="flex items-center gap-3 rounded-2xl bg-card border border-border p-4 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-elevated)] transition-shadow text-left"
+              >
+                <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary grid place-items-center shrink-0">
+                  <Folder className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-semibold truncate">{b.name}</p>
+                  <p className="text-xs text-muted-foreground">{b.count} item{b.count === 1 ? "" : "s"}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        )
       ) : filtered.length === 0 ? (
         <div className="text-center py-16">
-          <p className="text-muted-foreground text-sm">No chairs in stock. Hit the marketplaces and add your first flip.</p>
-          <Link to="/app/chair/new" className="inline-flex items-center mt-4 rounded-full bg-primary text-primary-foreground px-4 py-2 text-sm font-medium">
-            <Plus className="h-4 w-4 mr-1.5" /> Add your first flip
-          </Link>
+          <p className="text-muted-foreground text-sm">No chairs match.</p>
         </div>
       ) : (
         <div className="space-y-3">
