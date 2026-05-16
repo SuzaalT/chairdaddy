@@ -69,35 +69,26 @@ function Dashboard() {
       <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
 
       {unlisted.length > 0 && (
-        <div className="rounded-2xl border border-[oklch(0.85_0.12_75)] bg-[oklch(0.97_0.06_85)] p-4 shadow-[var(--shadow-card)]">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="h-4 w-4 text-[oklch(0.5_0.16_60)]" />
-            <h2 className="text-sm font-semibold text-[oklch(0.35_0.16_60)]">Action Required</h2>
+        <Link
+          to="/app/action-required"
+          className="flex items-center justify-between rounded-2xl border border-[oklch(0.85_0.12_75)] bg-[oklch(0.97_0.06_85)] p-4 shadow-[var(--shadow-card)] hover:bg-[oklch(0.95_0.07_85)] transition-colors"
+        >
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="h-10 w-10 rounded-full bg-[oklch(0.9_0.1_75)] grid place-items-center shrink-0">
+              <Sparkles className="h-5 w-5 text-[oklch(0.4_0.16_60)]" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-[oklch(0.35_0.16_60)]">Action Required ({unlisted.length})</p>
+              <p className="text-xs text-[oklch(0.45_0.14_60)] truncate">
+                {unlisted.length === 1 ? "1 chair needs" : `${unlisted.length} chairs need`} to be listed
+              </p>
+            </div>
           </div>
-          <p className="text-sm text-[oklch(0.4_0.16_60)] mb-3">
-            {unlisted.length} chair{unlisted.length === 1 ? "" : "s"} need{unlisted.length === 1 ? "s" : ""} to be listed
-          </p>
-          <ul className="space-y-1.5">
-            {unlisted.map((c) => (
-              <li key={c.id}>
-                <button
-                  onClick={() => setListChair(c)}
-                  className="w-full flex items-center justify-between rounded-lg bg-card/80 hover:bg-card border border-[oklch(0.9_0.08_75)] px-3 py-2 text-left transition-colors"
-                >
-                  <span className="min-w-0">
-                    <span className="block text-[11px] font-mono text-muted-foreground">{c.sku}</span>
-                    <span className="block text-sm font-medium truncate">{c.brand}{c.model ? ` · ${c.model}` : ""}</span>
-                  </span>
-                  <span className="flex items-center gap-2 shrink-0 text-xs text-muted-foreground">
-                    {daysBetween(c.date_acquired)}d
-                    <ChevronRight className="h-4 w-4" />
-                  </span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
+          <ChevronRight className="h-5 w-5 text-[oklch(0.45_0.14_60)] shrink-0 ml-2" />
+        </Link>
       )}
+
+      <NotesReminders />
 
       <div className="grid grid-cols-2 gap-3">
         <Stat label="Capital Deployed" value={cad(cashInvested)} hint="sitting in your storage" icon={Banknote} />
