@@ -93,12 +93,25 @@ function ChairDetail() {
         }
       } catch { /* ignore */ }
     }
-    // Receipts (public bucket)
+    // Receipts (private bucket → signed URL). Older rows may store URLs from
+    // either the `receipts` or `proof-docs` bucket; handle both.
     const receipts: string[] = Array.isArray(c.receipt_urls) ? c.receipt_urls : [];
-    receipts.forEach((url, i) => {
+    for (let i = 0; i < receipts.length; i++) {
+      const url = receipts[i];
       const ext = (url.split("?")[0].split(".").pop() || "jpg").slice(0, 4);
-      out.push({ url, label: `receipt-${i + 1}-${sku}.${ext}` });
-    });
+      let signed: string | null = null;
+      for (const bucket of ["receipts", "proof-docs"] as const) {
+        const marker = `/${bucket}/`;
+        const idx = url.indexOf(marker);
+        if (idx === -1) continue;
+        const path = url.slice(idx + marker.length).split("?")[0];
+        try {
+          const { data } = await supabase.storage.from(bucket).createSignedUrl(path, 60 * 60 * 24 * 7);
+          if (data?.signedUrl) { signed = data.signedUrl; break; }
+        } catch { /* try next */ }
+      }
+      out.push({ url: signed ?? url, label: `receipt-${i + 1}-${sku}.${ext}` });
+    }
     return out;
   }
 
