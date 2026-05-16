@@ -248,11 +248,14 @@ export function ChatPanel({ members }: { members: Member[] }) {
                       : cn("rounded-2xl", it.groupedTop && "rounded-tl-md", it.groupedBottom && "rounded-bl-md"),
                   )}
                 >
-                  {m.image_url && (
-                    <button onClick={() => setViewer(m.image_url!)} className="block">
-                      <img src={m.image_url} alt="" className="rounded-lg max-h-64 mb-1 cursor-zoom-in" />
-                    </button>
-                  )}
+                  {m.image_url && (() => {
+                    const src = signedImages[m.image_url] ?? m.image_url;
+                    return (
+                      <button onClick={() => setViewer(src)} className="block">
+                        <img src={src} alt="" className="rounded-lg max-h-64 mb-1 cursor-zoom-in" />
+                      </button>
+                    );
+                  })()}
                   {m.content && <p className="text-sm whitespace-pre-wrap break-words">{m.content}</p>}
                 </div>
                 {!it.groupedBottom && (
