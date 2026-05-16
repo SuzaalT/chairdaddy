@@ -36,7 +36,8 @@ export function TeamProvider({ children }: { children: ReactNode }) {
     }
     setLoading(true);
     const { data: prof } = await supabase.from("profiles").select("*").eq("id", user.id).maybeSingle();
-    setProfile(prof as Profile | null);
+    const { data: secret } = await supabase.from("user_secrets").select("anthropic_key").eq("user_id", user.id).maybeSingle();
+    setProfile(prof ? ({ ...(prof as object), anthropic_key: secret?.anthropic_key ?? null } as Profile) : null);
     if (prof?.current_team_id) {
       const { data: t } = await supabase.from("teams").select("*").eq("id", prof.current_team_id).maybeSingle();
       setTeam(t as Team | null);
