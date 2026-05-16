@@ -381,7 +381,6 @@ export type Database = {
       }
       profiles: {
         Row: {
-          anthropic_key: string | null
           created_at: string
           current_team_id: string | null
           email: string | null
@@ -391,7 +390,6 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          anthropic_key?: string | null
           created_at?: string
           current_team_id?: string | null
           email?: string | null
@@ -401,7 +399,6 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          anthropic_key?: string | null
           created_at?: string
           current_team_id?: string | null
           email?: string | null
@@ -670,6 +667,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      user_secrets: {
+        Row: {
+          anthropic_key: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          anthropic_key?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          anthropic_key?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       vehicle_expenses: {
         Row: {

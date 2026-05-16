@@ -37,9 +37,13 @@ function Settings() {
   async function saveProfile() {
     if (!profile) return;
     const { error } = await supabase.from("profiles").update({
-      full_name: name, notification_email: notify, anthropic_key: key,
+      full_name: name, notification_email: notify,
     }).eq("id", profile.id);
     if (error) return toast.error(error.message);
+    const { error: secretErr } = await supabase.from("user_secrets").upsert({
+      user_id: profile.id, anthropic_key: key || null,
+    });
+    if (secretErr) return toast.error(secretErr.message);
     toast.success("Saved");
     refresh();
   }
