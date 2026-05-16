@@ -42,9 +42,32 @@ export function ChatPanel({ members }: { members: Member[] }) {
   const [loadingMore, setLoadingMore] = useState(false);
   const [typingUsers, setTypingUsers] = useState<string[]>([]);
   const [viewer, setViewer] = useState<string | null>(null);
+  const [signedImages, setSignedImages] = useState<Record<string, string>>({});
   const scrollRef = useRef<HTMLDivElement>(null);
   const presenceRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
   const typingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Resolve chat-photos to signed URLs (bucket is private)
+  useEffect(() => {
+    const marker = "/chat-photos/";
+    const pending = msgs
+      .map((m) => m.image_url)
+      .filter((u): u is string => !!u && !signedImages[u]);
+    if (pending.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      const updates: Record<string, string> = {};
+      for (const url of pending) {
+        const idx = url.indexOf(marker);
+        if (idx === -1) { updates[url] = url; continue; }
+        const path = url.slice(idx + marker.length).split("?")[0];
+        const { data } = await supabase.storage.from("chat-photos").createSignedUrl(path, 60 * 60);
+        updates[url] = data?.signedUrl ?? url;
+      }
+      if (!cancelled) setSignedImages((p) => ({ ...p, ...updates }));
+    })();
+    return () => { cancelled = true; };
+  }, [msgs, signedImages]);
 
   const memberById = (uid: string) => members.find((m) => m.user_id === uid);
   const nameFor = (uid: string) => { const m = memberById(uid); return m?.full_name || m?.email || "Member"; };
