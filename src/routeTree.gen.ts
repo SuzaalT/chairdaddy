@@ -21,6 +21,7 @@ import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppLogbookRouteImport } from './routes/app.logbook'
 import { Route as AppListingAiRouteImport } from './routes/app.listing-ai'
 import { Route as AppExpensesRouteImport } from './routes/app.expenses'
+import { Route as AppActionRequiredRouteImport } from './routes/app.action-required'
 import { Route as AppInventoryIndexRouteImport } from './routes/app.inventory.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
 import { Route as AppTeamRolesRouteImport } from './routes/app.team.roles'
@@ -91,6 +92,11 @@ const AppExpensesRoute = AppExpensesRouteImport.update({
   path: '/expenses',
   getParentRoute: () => AppRoute,
 } as any)
+const AppActionRequiredRoute = AppActionRequiredRouteImport.update({
+  id: '/action-required',
+  path: '/action-required',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppInventoryIndexRoute = AppInventoryIndexRouteImport.update({
   id: '/inventory/',
   path: '/inventory/',
@@ -146,6 +152,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/app/action-required': typeof AppActionRequiredRoute
   '/app/expenses': typeof AppExpensesRoute
   '/app/listing-ai': typeof AppListingAiRoute
   '/app/logbook': typeof AppLogbookRoute
@@ -168,6 +175,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/app/action-required': typeof AppActionRequiredRoute
   '/app/expenses': typeof AppExpensesRoute
   '/app/listing-ai': typeof AppListingAiRoute
   '/app/logbook': typeof AppLogbookRoute
@@ -192,6 +200,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/unsubscribe': typeof UnsubscribeRoute
+  '/app/action-required': typeof AppActionRequiredRoute
   '/app/expenses': typeof AppExpensesRoute
   '/app/listing-ai': typeof AppListingAiRoute
   '/app/logbook': typeof AppLogbookRoute
@@ -217,6 +226,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/unsubscribe'
+    | '/app/action-required'
     | '/app/expenses'
     | '/app/listing-ai'
     | '/app/logbook'
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/unsubscribe'
+    | '/app/action-required'
     | '/app/expenses'
     | '/app/listing-ai'
     | '/app/logbook'
@@ -262,6 +273,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/onboarding'
     | '/unsubscribe'
+    | '/app/action-required'
     | '/app/expenses'
     | '/app/listing-ai'
     | '/app/logbook'
@@ -379,6 +391,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppExpensesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/action-required': {
+      id: '/app/action-required'
+      path: '/action-required'
+      fullPath: '/app/action-required'
+      preLoaderRoute: typeof AppActionRequiredRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/inventory/': {
       id: '/app/inventory/'
       path: '/inventory'
@@ -457,6 +476,7 @@ const AppTeamRouteWithChildren =
   AppTeamRoute._addFileChildren(AppTeamRouteChildren)
 
 interface AppRouteChildren {
+  AppActionRequiredRoute: typeof AppActionRequiredRoute
   AppExpensesRoute: typeof AppExpensesRoute
   AppListingAiRoute: typeof AppListingAiRoute
   AppLogbookRoute: typeof AppLogbookRoute
@@ -470,6 +490,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppActionRequiredRoute: AppActionRequiredRoute,
   AppExpensesRoute: AppExpensesRoute,
   AppListingAiRoute: AppListingAiRoute,
   AppLogbookRoute: AppLogbookRoute,

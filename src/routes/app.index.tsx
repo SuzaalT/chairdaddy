@@ -8,6 +8,7 @@ import { cad, daysBetween, HST_THRESHOLD, landedCost, profit, STALE_DAYS } from 
 import { TrendingUp, Package, Tag, AlertTriangle, Banknote, Clock, Calendar, BarChart3, ArrowRight, Sparkles, ChevronRight } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, Tooltip, Cell } from "recharts";
 import { ListChairSheet } from "@/components/ListChairSheet";
+import { NotesReminders } from "@/components/NotesReminders";
 import type { Database } from "@/integrations/supabase/types";
 
 type Chair = Database["public"]["Tables"]["chairs"]["Row"];
