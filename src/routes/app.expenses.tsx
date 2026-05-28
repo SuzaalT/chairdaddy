@@ -10,7 +10,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Camera, Loader2, Plus, Receipt, Sparkles } from "lucide-react";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { Camera, Loader2, Plus, Receipt, Sparkles, Pencil, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { callAnthropic, fileToBase64 } from "@/lib/anthropic";
 
@@ -24,13 +25,19 @@ const CATS = [
   { v: "bank_fees", l: "Bank Fees" }, { v: "other", l: "Other" },
 ] as const;
 
+type FormState = { amount: string; expense_date: string; category: string; vendor: string; notes: string; receipt_url: string };
+
+const emptyForm = (): FormState => ({ amount: "", expense_date: new Date().toISOString().slice(0, 10), category: "other", vendor: "", notes: "", receipt_url: "" });
+
 function Expenses() {
   const { team, profile } = useTeam();
   const { user } = useAuth();
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [scanning, setScanning] = useState(false);
-  const [f, setF] = useState({ amount: "", expense_date: new Date().toISOString().slice(0, 10), category: "other", vendor: "", notes: "", receipt_url: "" as string | "" });
+  const [f, setF] = useState<FormState>(emptyForm());
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; label: string } | null>(null);
 
   const { data: expenses = [] } = useQuery({
     queryKey: ["expenses", team?.id],
@@ -79,19 +86,54 @@ function Expenses() {
     } finally { setScanning(false); }
   }
 
+  function startEdit(e: typeof expenses[number]) {
+    setEditingId(e.id);
+    setOpen(true);
+    setF({
+      amount: String(e.amount ?? ""),
+      expense_date: e.expense_date,
+      category: e.category,
+      vendor: e.vendor ?? "",
+      notes: e.notes ?? "",
+      receipt_url: e.receipt_url ?? "",
+    });
+  }
+
+  function cancelForm() {
+    setOpen(false);
+    setEditingId(null);
+    setF(emptyForm());
+  }
+
   async function save() {
     if (!team || !user || !f.amount) return;
-    const { error } = await supabase.from("expenses").insert({
-      team_id: team.id, created_by: user.id,
-      amount: Number(f.amount), expense_date: f.expense_date,
-      category: f.category as "other", vendor: f.vendor || null, notes: f.notes || null,
+    const payload = {
+      amount: Number(f.amount),
+      expense_date: f.expense_date,
+      category: f.category as "other",
+      vendor: f.vendor || null,
+      notes: f.notes || null,
       receipt_url: f.receipt_url || null,
-    });
-    if (error) return toast.error(error.message);
-    toast.success("Expense added");
-    setOpen(false);
-    setF({ amount: "", expense_date: new Date().toISOString().slice(0, 10), category: "other", vendor: "", notes: "", receipt_url: "" });
+    };
+    if (editingId) {
+      const { error } = await supabase.from("expenses").update(payload).eq("id", editingId);
+      if (error) return toast.error(error.message);
+      toast.success("Expense updated");
+    } else {
+      const { error } = await supabase.from("expenses").insert({ ...payload, team_id: team.id, created_by: user.id });
+      if (error) return toast.error(error.message);
+      toast.success("Expense added");
+    }
+    cancelForm();
     qc.invalidateQueries({ queryKey: ["expenses", team.id] });
+  }
+
+  async function doDelete() {
+    if (!pendingDelete) return;
+    const { error } = await supabase.from("expenses").delete().eq("id", pendingDelete.id);
+    if (error) toast.error(error.message);
+    else { toast.success("Deleted"); qc.invalidateQueries({ queryKey: ["expenses", team?.id] }); }
+    setPendingDelete(null);
   }
 
   return (
@@ -103,21 +145,23 @@ function Expenses() {
       </div>
 
       {!open ? (
-        <Button onClick={() => setOpen(true)} className="w-full h-12 mb-4"><Plus className="h-4 w-4 mr-1.5" /> Add expense</Button>
+        <Button onClick={() => { setEditingId(null); setF(emptyForm()); setOpen(true); }} className="w-full h-12 mb-4"><Plus className="h-4 w-4 mr-1.5" /> Add expense</Button>
       ) : (
         <div className="rounded-2xl bg-card border border-border p-4 space-y-3 mb-4">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold">New expense</h2>
-            <button onClick={() => setOpen(false)} className="text-xs text-muted-foreground">Cancel</button>
+            <h2 className="font-semibold">{editingId ? "Edit expense" : "New expense"}</h2>
+            <button onClick={cancelForm} className="text-xs text-muted-foreground">Cancel</button>
           </div>
-          <div>
-            <Label className="text-xs uppercase tracking-wider text-muted-foreground">Scan receipt</Label>
-            <label className="mt-1 flex items-center justify-center gap-2 h-20 rounded-xl border border-dashed border-border bg-muted/40 cursor-pointer">
-              {scanning ? <Loader2 className="h-5 w-5 animate-spin" /> : <><Camera className="h-5 w-5" /><span className="text-sm">Take photo or upload</span></>}
-              <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => e.target.files?.[0] && scanReceipt(e.target.files[0])} />
-            </label>
-            <p className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1"><Sparkles className="h-3 w-3" /> AI auto-fills amount, date, vendor, category</p>
-          </div>
+          {!editingId && (
+            <div>
+              <Label className="text-xs uppercase tracking-wider text-muted-foreground">Scan receipt</Label>
+              <label className="mt-1 flex items-center justify-center gap-2 h-20 rounded-xl border border-dashed border-border bg-muted/40 cursor-pointer">
+                {scanning ? <Loader2 className="h-5 w-5 animate-spin" /> : <><Camera className="h-5 w-5" /><span className="text-sm">Take photo or upload</span></>}
+                <input type="file" accept="image/*" capture="environment" className="hidden" onChange={(e) => e.target.files?.[0] && scanReceipt(e.target.files[0])} />
+              </label>
+              <p className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1"><Sparkles className="h-3 w-3" /> AI auto-fills amount, date, vendor, category</p>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-2">
             <div><Label className="text-xs">Amount</Label><Input type="number" step="0.01" value={f.amount} onChange={(e) => setF({ ...f, amount: e.target.value })} /></div>
             <div><Label className="text-xs">Date</Label><Input type="date" value={f.expense_date} onChange={(e) => setF({ ...f, expense_date: e.target.value })} /></div>
@@ -129,7 +173,7 @@ function Expenses() {
             </Select>
           </div>
           <div><Label className="text-xs">Paid To</Label><Input value={f.vendor} onChange={(e) => setF({ ...f, vendor: e.target.value })} /></div>
-          <Button onClick={save} className="w-full">Save</Button>
+          <Button onClick={save} className="w-full">{editingId ? "Save changes" : "Save"}</Button>
         </div>
       )}
 
@@ -144,11 +188,35 @@ function Expenses() {
                 <p className="text-xs text-muted-foreground">{e.expense_date} · {cat?.l}</p>
               </div>
               <p className="text-sm font-semibold tabular-nums">{cad(e.amount)}</p>
+              <div className="flex items-center gap-1 shrink-0">
+                <button
+                  onClick={() => startEdit(e)}
+                  aria-label="Edit expense"
+                  className="h-8 w-8 grid place-items-center rounded-full border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  onClick={() => setPendingDelete({ id: e.id, label: e.vendor || cat?.l || "this expense" })}
+                  aria-label="Delete expense"
+                  className="h-8 w-8 grid place-items-center rounded-full border border-border bg-card hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              </div>
             </div>
           );
         })}
         {expenses.length === 0 && <p className="text-center text-sm text-muted-foreground py-8">No expenses yet.</p>}
       </div>
+
+      <ConfirmDialog
+        open={!!pendingDelete}
+        onOpenChange={(v) => !v && setPendingDelete(null)}
+        title={`Delete ${pendingDelete?.label}?`}
+        description="This permanently removes the expense. This cannot be undone."
+        onConfirm={doDelete}
+      />
     </div>
   );
 }

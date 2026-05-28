@@ -17,6 +17,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as EmailUnsubscribeRouteImport } from './routes/email/unsubscribe'
 import { Route as AppTeamRouteImport } from './routes/app.team'
+import { Route as AppSoldRouteImport } from './routes/app.sold'
 import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppLogbookRouteImport } from './routes/app.logbook'
 import { Route as AppListingAiRouteImport } from './routes/app.listing-ai'
@@ -70,6 +71,11 @@ const EmailUnsubscribeRoute = EmailUnsubscribeRouteImport.update({
 const AppTeamRoute = AppTeamRouteImport.update({
   id: '/team',
   path: '/team',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSoldRoute = AppSoldRouteImport.update({
+  id: '/sold',
+  path: '/sold',
   getParentRoute: () => AppRoute,
 } as any)
 const AppSettingsRoute = AppSettingsRouteImport.update({
@@ -157,6 +163,7 @@ export interface FileRoutesByFullPath {
   '/app/listing-ai': typeof AppListingAiRoute
   '/app/logbook': typeof AppLogbookRoute
   '/app/settings': typeof AppSettingsRoute
+  '/app/sold': typeof AppSoldRoute
   '/app/team': typeof AppTeamRouteWithChildren
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/app/': typeof AppIndexRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/app/listing-ai': typeof AppListingAiRoute
   '/app/logbook': typeof AppLogbookRoute
   '/app/settings': typeof AppSettingsRoute
+  '/app/sold': typeof AppSoldRoute
   '/app/team': typeof AppTeamRouteWithChildren
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/app': typeof AppIndexRoute
@@ -205,6 +213,7 @@ export interface FileRoutesById {
   '/app/listing-ai': typeof AppListingAiRoute
   '/app/logbook': typeof AppLogbookRoute
   '/app/settings': typeof AppSettingsRoute
+  '/app/sold': typeof AppSoldRoute
   '/app/team': typeof AppTeamRouteWithChildren
   '/email/unsubscribe': typeof EmailUnsubscribeRoute
   '/app/': typeof AppIndexRoute
@@ -231,6 +240,7 @@ export interface FileRouteTypes {
     | '/app/listing-ai'
     | '/app/logbook'
     | '/app/settings'
+    | '/app/sold'
     | '/app/team'
     | '/email/unsubscribe'
     | '/app/'
@@ -254,6 +264,7 @@ export interface FileRouteTypes {
     | '/app/listing-ai'
     | '/app/logbook'
     | '/app/settings'
+    | '/app/sold'
     | '/app/team'
     | '/email/unsubscribe'
     | '/app'
@@ -278,6 +289,7 @@ export interface FileRouteTypes {
     | '/app/listing-ai'
     | '/app/logbook'
     | '/app/settings'
+    | '/app/sold'
     | '/app/team'
     | '/email/unsubscribe'
     | '/app/'
@@ -361,6 +373,13 @@ declare module '@tanstack/react-router' {
       path: '/team'
       fullPath: '/app/team'
       preLoaderRoute: typeof AppTeamRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/sold': {
+      id: '/app/sold'
+      path: '/sold'
+      fullPath: '/app/sold'
+      preLoaderRoute: typeof AppSoldRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/settings': {
@@ -481,6 +500,7 @@ interface AppRouteChildren {
   AppListingAiRoute: typeof AppListingAiRoute
   AppLogbookRoute: typeof AppLogbookRoute
   AppSettingsRoute: typeof AppSettingsRoute
+  AppSoldRoute: typeof AppSoldRoute
   AppTeamRoute: typeof AppTeamRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
   AppChairNewRoute: typeof AppChairNewRoute
@@ -495,6 +515,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppListingAiRoute: AppListingAiRoute,
   AppLogbookRoute: AppLogbookRoute,
   AppSettingsRoute: AppSettingsRoute,
+  AppSoldRoute: AppSoldRoute,
   AppTeamRoute: AppTeamRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
   AppChairNewRoute: AppChairNewRoute,
