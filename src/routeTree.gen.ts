@@ -22,7 +22,6 @@ import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppLogbookRouteImport } from './routes/app.logbook'
 import { Route as AppListingAiRouteImport } from './routes/app.listing-ai'
 import { Route as AppExpensesRouteImport } from './routes/app.expenses'
-import { Route as AppSoldRouteImport } from './routes/app.sold'
 import { Route as AppActionRequiredRouteImport } from './routes/app.action-required'
 import { Route as AppInventoryIndexRouteImport } from './routes/app.inventory.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
@@ -97,6 +96,11 @@ const AppListingAiRoute = AppListingAiRouteImport.update({
 const AppExpensesRoute = AppExpensesRouteImport.update({
   id: '/expenses',
   path: '/expenses',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSoldRoute = AppSoldRouteImport.update({
+  id: '/sold',
+  path: '/sold',
   getParentRoute: () => AppRoute,
 } as any)
 const AppActionRequiredRoute = AppActionRequiredRouteImport.update({
