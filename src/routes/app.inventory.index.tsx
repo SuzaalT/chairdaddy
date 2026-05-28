@@ -17,7 +17,7 @@ import type { Database } from "@/integrations/supabase/types";
 
 type Chair = Database["public"]["Tables"]["chairs"]["Row"];
 
-type Filter = "all" | "in_stock" | "listed" | "stale" | "sold";
+type Filter = "all" | "in_stock" | "listed" | "stale";
 
 export const Route = createFileRoute("/app/inventory/")({ component: Inventory });
 
@@ -28,6 +28,7 @@ function Inventory() {
   const [filter, setFilter] = useState<Filter>("all");
   const [q, setQ] = useState("");
   const [brand, setBrand] = useState<string | null>(null);
+  const [model, setModel] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{ id: string; label: string } | null>(null);
   const [listChair, setListChair] = useState<Chair | null>(null);
 
@@ -51,16 +52,13 @@ function Inventory() {
     return () => { supabase.removeChannel(ch); };
   }, [team, qc]);
 
-  const filtered = useMemo(() => {
+  // Sold items go to the dedicated /app/sold route — exclude here entirely.
+  const baseFiltered = useMemo(() => {
     return chairs.filter((c) => {
-      if (brand && c.brand !== brand) return false;
+      if (c.status === "sold") return false;
       if (filter === "in_stock" && c.status !== "in_stock") return false;
       if (filter === "listed" && c.status !== "listed") return false;
-      if (filter === "sold" && c.status !== "sold") return false;
-      if (filter === "stale") {
-        if (c.status === "sold") return false;
-        if (daysBetween(c.date_acquired) <= STALE_DAYS) return false;
-      }
+      if (filter === "stale" && daysBetween(c.date_acquired) <= STALE_DAYS) return false;
       if (q) {
         const t = q.toLowerCase();
         const hay = [c.sku, c.brand, c.model, c.notes, c.condition, c.storage_unit].filter(Boolean).join(" ").toLowerCase();
@@ -68,32 +66,32 @@ function Inventory() {
       }
       return true;
     });
-  }, [chairs, filter, q, brand]);
+  }, [chairs, filter, q]);
 
-  // Brand folders — derived from current filter (status/stale) + search query, ignoring selected brand
   const brandFolders = useMemo(() => {
-    const matches = chairs.filter((c) => {
-      if (filter === "in_stock" && c.status !== "in_stock") return false;
-      if (filter === "listed" && c.status !== "listed") return false;
-      if (filter === "sold" && c.status !== "sold") return false;
-      if (filter === "stale") {
-        if (c.status === "sold") return false;
-        if (daysBetween(c.date_acquired) <= STALE_DAYS) return false;
-      }
-      if (q) {
-        const t = q.toLowerCase();
-        const hay = [c.sku, c.brand, c.model, c.notes, c.condition, c.storage_unit].filter(Boolean).join(" ").toLowerCase();
-        if (!hay.includes(t)) return false;
-      }
-      return true;
-    });
-    const counts = matches.reduce<Record<string, number>>((acc, c) => {
+    const counts = baseFiltered.reduce<Record<string, number>>((acc, c) => {
       const b = c.brand || "Unknown";
       acc[b] = (acc[b] ?? 0) + 1;
       return acc;
     }, {});
     return Object.entries(counts).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
-  }, [chairs, filter, q]);
+  }, [baseFiltered]);
+
+  const modelFolders = useMemo(() => {
+    if (!brand) return [];
+    const inBrand = baseFiltered.filter((c) => (c.brand || "Unknown") === brand);
+    const counts = inBrand.reduce<Record<string, number>>((acc, c) => {
+      const m = c.model || "No model";
+      acc[m] = (acc[m] ?? 0) + 1;
+      return acc;
+    }, {});
+    return Object.entries(counts).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
+  }, [baseFiltered, brand]);
+
+  const items = useMemo(() => {
+    if (!brand || !model) return [];
+    return baseFiltered.filter((c) => (c.brand || "Unknown") === brand && (c.model || "No model") === model);
+  }, [baseFiltered, brand, model]);
 
   async function doDelete() {
     if (!pendingDelete) return;
@@ -105,15 +103,22 @@ function Inventory() {
 
   const filters: { id: Filter; label: string }[] = [
     { id: "all", label: "All" }, { id: "in_stock", label: "In Stock" },
-    { id: "listed", label: "Listed" }, { id: "stale", label: "Stale" }, { id: "sold", label: "Sold" },
+    { id: "listed", label: "Listed" }, { id: "stale", label: "Stale" },
   ];
+
+  const title = model ?? brand ?? "My Stock";
+  const totalActive = chairs.filter((c) => c.status !== "sold").length;
 
   return (
     <div className="px-4 pt-4 pb-24">
       <div className="flex items-center justify-between mb-3">
-        <h1 className="text-2xl font-bold tracking-tight">{brand ?? "My Stock"}</h1>
+        <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
         <span className="text-xs text-muted-foreground">
-          {brand ? `${filtered.length} item${filtered.length === 1 ? "" : "s"}` : `${brandFolders.length} brand${brandFolders.length === 1 ? "" : "s"} · ${chairs.length} total`}
+          {model
+            ? `${items.length} item${items.length === 1 ? "" : "s"}`
+            : brand
+            ? `${modelFolders.length} model${modelFolders.length === 1 ? "" : "s"}`
+            : `${brandFolders.length} brand${brandFolders.length === 1 ? "" : "s"} · ${totalActive} total`}
         </span>
       </div>
 
@@ -137,9 +142,12 @@ function Inventory() {
         ))}
       </div>
 
-      {brand && (
-        <button onClick={() => setBrand(null)} className="flex items-center gap-1 text-sm text-muted-foreground mb-3 hover:text-foreground">
-          <ChevronLeft className="h-4 w-4" /> All brands
+      {(brand || model) && (
+        <button
+          onClick={() => (model ? setModel(null) : setBrand(null))}
+          className="flex items-center gap-1 text-sm text-muted-foreground mb-3 hover:text-foreground"
+        >
+          <ChevronLeft className="h-4 w-4" /> {model ? brand : "All brands"}
         </button>
       )}
 
@@ -172,13 +180,35 @@ function Inventory() {
             ))}
           </div>
         )
-      ) : filtered.length === 0 ? (
+      ) : !model ? (
+        modelFolders.length === 0 ? (
+          <div className="text-center py-16"><p className="text-muted-foreground text-sm">No models match.</p></div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            {modelFolders.map((m) => (
+              <button
+                key={m.name}
+                onClick={() => setModel(m.name)}
+                className="flex items-center gap-3 rounded-2xl bg-card border border-border p-4 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-elevated)] transition-shadow text-left"
+              >
+                <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary grid place-items-center shrink-0">
+                  <Folder className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-semibold truncate">{m.name}</p>
+                  <p className="text-xs text-muted-foreground">{m.count} item{m.count === 1 ? "" : "s"}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        )
+      ) : items.length === 0 ? (
         <div className="text-center py-16">
           <p className="text-muted-foreground text-sm">No chairs match.</p>
         </div>
       ) : (
         <div className="space-y-3">
-          {filtered.map((c) => {
+          {items.map((c) => {
             const needsListing = c.status === "in_stock" && !c.date_listed;
             return (
               <div key={c.id} className="relative">
