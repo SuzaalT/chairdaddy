@@ -98,11 +98,6 @@ const AppExpensesRoute = AppExpensesRouteImport.update({
   path: '/expenses',
   getParentRoute: () => AppRoute,
 } as any)
-const AppSoldRoute = AppSoldRouteImport.update({
-  id: '/sold',
-  path: '/sold',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppActionRequiredRoute = AppActionRequiredRouteImport.update({
   id: '/action-required',
   path: '/action-required',
