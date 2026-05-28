@@ -34,14 +34,16 @@ export function ChairCard({ chair, draggable, readOnly }: { chair: Chair; dragga
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <StatusBadge status={chair.status} stale={stale} />
-          <button
-            type="button"
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); nav({ to: "/app/chair/$chairId/edit", params: { chairId: chair.id } }); }}
-            aria-label="Edit chair"
-            className="h-8 w-8 grid place-items-center rounded-full border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground"
-          >
-            <Pencil className="h-3.5 w-3.5" />
-          </button>
+          {!readOnly && (
+            <button
+              type="button"
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); nav({ to: "/app/chair/$chairId/edit", params: { chairId: chair.id } }); }}
+              aria-label="Edit chair"
+              className="h-8 w-8 grid place-items-center rounded-full border border-border bg-card hover:bg-muted text-muted-foreground hover:text-foreground"
+            >
+              <Pencil className="h-3.5 w-3.5" />
+            </button>
+          )}
         </div>
       </div>
       {attention && (
