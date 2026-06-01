@@ -8,7 +8,7 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const { user, loading } = useAuth();
-  const { team, loading: tloading } = useTeam();
+  const { team, profile, loading: tloading } = useTeam();
   if (loading || tloading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -17,6 +17,7 @@ function Index() {
     );
   }
   if (!user) return <Navigate to="/login" />;
+  if (profile && profile.approval_status !== "approved") return <Navigate to="/pending" />;
   if (!team) return <Navigate to="/onboarding" />;
   return <Navigate to="/app" />;
 }
