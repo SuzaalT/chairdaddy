@@ -154,7 +154,7 @@ const ChairSaleEmail = ({
           <Hr style={hr} />
           <Text style={footer}>
             Logged by {soldBy} on {soldAt}<br />
-            ChairFlip Business Manager · Ontario, Canada · <Link href="https://marketplaceflip.com" style={link}>marketplaceflip.com</Link>
+            MarketplaceFlip Business Manager · Ontario, Canada · <Link href="https://marketplaceflip.com" style={link}>marketplaceflip.com</Link>
           </Text>
         </Container>
       </Body>
