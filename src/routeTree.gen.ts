@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
+import { Route as PendingRouteImport } from './routes/pending'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/app'
@@ -22,6 +23,7 @@ import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppLogbookRouteImport } from './routes/app.logbook'
 import { Route as AppListingAiRouteImport } from './routes/app.listing-ai'
 import { Route as AppExpensesRouteImport } from './routes/app.expenses'
+import { Route as AppAdminRouteImport } from './routes/app.admin'
 import { Route as AppActionRequiredRouteImport } from './routes/app.action-required'
 import { Route as AppInventoryIndexRouteImport } from './routes/app.inventory.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
@@ -36,6 +38,11 @@ import { Route as AppChairChairIdEditRouteImport } from './routes/app.chair.$cha
 const UnsubscribeRoute = UnsubscribeRouteImport.update({
   id: '/unsubscribe',
   path: '/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PendingRoute = PendingRouteImport.update({
+  id: '/pending',
+  path: '/pending',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OnboardingRoute = OnboardingRouteImport.update({
@@ -98,6 +105,11 @@ const AppExpensesRoute = AppExpensesRouteImport.update({
   path: '/expenses',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdminRoute = AppAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppActionRequiredRoute = AppActionRequiredRouteImport.update({
   id: '/action-required',
   path: '/action-required',
@@ -157,8 +169,10 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/pending': typeof PendingRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/app/action-required': typeof AppActionRequiredRoute
+  '/app/admin': typeof AppAdminRoute
   '/app/expenses': typeof AppExpensesRoute
   '/app/listing-ai': typeof AppListingAiRoute
   '/app/logbook': typeof AppLogbookRoute
@@ -181,8 +195,10 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/pending': typeof PendingRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/app/action-required': typeof AppActionRequiredRoute
+  '/app/admin': typeof AppAdminRoute
   '/app/expenses': typeof AppExpensesRoute
   '/app/listing-ai': typeof AppListingAiRoute
   '/app/logbook': typeof AppLogbookRoute
@@ -207,8 +223,10 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
+  '/pending': typeof PendingRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/app/action-required': typeof AppActionRequiredRoute
+  '/app/admin': typeof AppAdminRoute
   '/app/expenses': typeof AppExpensesRoute
   '/app/listing-ai': typeof AppListingAiRoute
   '/app/logbook': typeof AppLogbookRoute
@@ -234,8 +252,10 @@ export interface FileRouteTypes {
     | '/app'
     | '/login'
     | '/onboarding'
+    | '/pending'
     | '/unsubscribe'
     | '/app/action-required'
+    | '/app/admin'
     | '/app/expenses'
     | '/app/listing-ai'
     | '/app/logbook'
@@ -258,8 +278,10 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/onboarding'
+    | '/pending'
     | '/unsubscribe'
     | '/app/action-required'
+    | '/app/admin'
     | '/app/expenses'
     | '/app/listing-ai'
     | '/app/logbook'
@@ -283,8 +305,10 @@ export interface FileRouteTypes {
     | '/app'
     | '/login'
     | '/onboarding'
+    | '/pending'
     | '/unsubscribe'
     | '/app/action-required'
+    | '/app/admin'
     | '/app/expenses'
     | '/app/listing-ai'
     | '/app/logbook'
@@ -309,6 +333,7 @@ export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
+  PendingRoute: typeof PendingRoute
   UnsubscribeRoute: typeof UnsubscribeRoute
   EmailUnsubscribeRoute: typeof EmailUnsubscribeRoute
   LovableEmailSuppressionRoute: typeof LovableEmailSuppressionRoute
@@ -324,6 +349,13 @@ declare module '@tanstack/react-router' {
       path: '/unsubscribe'
       fullPath: '/unsubscribe'
       preLoaderRoute: typeof UnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pending': {
+      id: '/pending'
+      path: '/pending'
+      fullPath: '/pending'
+      preLoaderRoute: typeof PendingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/onboarding': {
@@ -408,6 +440,13 @@ declare module '@tanstack/react-router' {
       path: '/expenses'
       fullPath: '/app/expenses'
       preLoaderRoute: typeof AppExpensesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/admin': {
+      id: '/app/admin'
+      path: '/admin'
+      fullPath: '/app/admin'
+      preLoaderRoute: typeof AppAdminRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/action-required': {
@@ -496,6 +535,7 @@ const AppTeamRouteWithChildren =
 
 interface AppRouteChildren {
   AppActionRequiredRoute: typeof AppActionRequiredRoute
+  AppAdminRoute: typeof AppAdminRoute
   AppExpensesRoute: typeof AppExpensesRoute
   AppListingAiRoute: typeof AppListingAiRoute
   AppLogbookRoute: typeof AppLogbookRoute
@@ -511,6 +551,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppActionRequiredRoute: AppActionRequiredRoute,
+  AppAdminRoute: AppAdminRoute,
   AppExpensesRoute: AppExpensesRoute,
   AppListingAiRoute: AppListingAiRoute,
   AppLogbookRoute: AppLogbookRoute,
@@ -531,6 +572,7 @@ const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
+  PendingRoute: PendingRoute,
   UnsubscribeRoute: UnsubscribeRoute,
   EmailUnsubscribeRoute: EmailUnsubscribeRoute,
   LovableEmailSuppressionRoute: LovableEmailSuppressionRoute,
@@ -541,13 +583,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

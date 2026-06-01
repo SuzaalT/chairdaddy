@@ -13,7 +13,7 @@ export const Route = createFileRoute("/onboarding")({ component: Onboarding });
 
 function Onboarding() {
   const { user } = useAuth();
-  const { team, refresh } = useTeam();
+  const { team, profile, refresh } = useTeam();
   const nav = useNavigate();
   const [tab, setTab] = useState<"create" | "join">("create");
   const [name, setName] = useState("");
@@ -22,6 +22,7 @@ function Onboarding() {
   const [preview, setPreview] = useState<{ team_name: string; role: string } | null>(null);
 
   if (!user) return <Navigate to="/login" />;
+  if (profile && profile.approval_status !== "approved") return <Navigate to="/pending" />;
   if (team) return <Navigate to="/app" />;
 
   async function createTeam(e: React.FormEvent) {

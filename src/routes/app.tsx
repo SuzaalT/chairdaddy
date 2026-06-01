@@ -1,14 +1,16 @@
 import { createFileRoute, Outlet, Navigate, Link } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { useTeam } from "@/hooks/use-team";
+import { useIsAppAdmin } from "@/hooks/use-is-admin";
 import { BottomNav } from "@/components/BottomNav";
-import { Settings, Users } from "lucide-react";
+import { Settings, Users, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/app")({ component: AppLayout });
 
 function AppLayout() {
   const { user, loading } = useAuth();
   const { team, profile, loading: tloading } = useTeam();
+  const { isAdmin } = useIsAppAdmin();
 
   if (loading || tloading) {
     return (
@@ -18,6 +20,7 @@ function AppLayout() {
     );
   }
   if (!user) return <Navigate to="/login" />;
+  if (profile && profile.approval_status !== "approved") return <Navigate to="/pending" />;
   if (!team) return <Navigate to="/onboarding" />;
 
   const initials = (profile?.full_name || profile?.email || "?")
@@ -29,6 +32,11 @@ function AppLayout() {
         <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
           <Link to="/app" className="font-bold tracking-tight text-base">ChairFlip <span className="text-muted-foreground font-normal">· {team.name}</span></Link>
           <div className="flex items-center gap-1">
+            {isAdmin && (
+              <Link to="/app/admin" className="h-11 w-11 grid place-items-center rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" aria-label="Admin">
+                <ShieldCheck className="h-5 w-5" />
+              </Link>
+            )}
             <Link to="/app/team" className="h-11 w-11 grid place-items-center rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" aria-label="Team">
               <Users className="h-5 w-5" />
             </Link>
