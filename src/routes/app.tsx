@@ -30,7 +30,7 @@ function AppLayout() {
     <div className="min-h-dvh bg-background pb-safe-nav">
       <header className="sticky top-0 z-30 bg-background/85 backdrop-blur border-b border-border safe-top safe-left safe-right">
         <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
-          <Link to="/app" className="font-bold tracking-tight text-base">ChairFlip <span className="text-muted-foreground font-normal">· {team.name}</span></Link>
+          <Link to="/app" className="font-bold tracking-tight text-base">MarketplaceFlip <span className="text-muted-foreground font-normal">· {team.name}</span></Link>
           <div className="flex items-center gap-1">
             {isAdmin && (
               <Link to="/app/admin" className="h-11 w-11 grid place-items-center rounded-full hover:bg-muted text-muted-foreground hover:text-foreground transition-colors" aria-label="Admin">
