@@ -37,7 +37,7 @@ function LoginPage() {
           <div className="h-11 w-11 rounded-2xl bg-primary text-primary-foreground grid place-items-center shadow-[var(--shadow-elevated)]">
             <Armchair className="h-6 w-6" />
           </div>
-          <span className="text-2xl font-bold tracking-tight">ChairFlip</span>
+          <span className="text-2xl font-bold tracking-tight">MarketplaceFlip</span>
         </div>
         <h1 className="text-2xl font-semibold mb-1">{mode === "signin" ? "Sign in" : "Create your account"}</h1>
         <p className="text-sm text-muted-foreground mb-8">{mode === "signin" ? "Get back to your inventory." : "Start tracking your office chair flips."}</p>
