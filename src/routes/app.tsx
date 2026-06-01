@@ -1,14 +1,16 @@
 import { createFileRoute, Outlet, Navigate, Link } from "@tanstack/react-router";
 import { useAuth } from "@/hooks/use-auth";
 import { useTeam } from "@/hooks/use-team";
+import { useIsAppAdmin } from "@/hooks/use-is-admin";
 import { BottomNav } from "@/components/BottomNav";
-import { Settings, Users } from "lucide-react";
+import { Settings, Users, ShieldCheck } from "lucide-react";
 
 export const Route = createFileRoute("/app")({ component: AppLayout });
 
 function AppLayout() {
   const { user, loading } = useAuth();
   const { team, profile, loading: tloading } = useTeam();
+  const { isAdmin } = useIsAppAdmin();
 
   if (loading || tloading) {
     return (
