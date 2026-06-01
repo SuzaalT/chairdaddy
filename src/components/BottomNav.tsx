@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { LayoutDashboard, Package, CheckCircle2, Receipt, Car, Sparkles } from "lucide-react";
+import { LayoutDashboard, Package, CheckCircle2, Receipt, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items: { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean }[] = [
@@ -7,7 +7,6 @@ const items: { to: string; label: string; icon: typeof LayoutDashboard; exact?: 
   { to: "/app/inventory", label: "Inventory", icon: Package },
   { to: "/app/sold", label: "Sold", icon: CheckCircle2 },
   { to: "/app/expenses", label: "Expenses", icon: Receipt },
-  { to: "/app/logbook", label: "Logbook", icon: Car },
   { to: "/app/listing-ai", label: "Listing AI", icon: Sparkles },
 ];
 
@@ -18,7 +17,7 @@ export function BottomNav() {
       data-bottom-nav
       className="fixed bottom-0 inset-x-0 z-40 bg-card/95 backdrop-blur border-t border-border safe-bottom safe-left safe-right transition-transform duration-200"
     >
-      <ul className="grid grid-cols-6 max-w-lg mx-auto">
+      <ul className="grid grid-cols-5 max-w-lg mx-auto">
         {items.map((it) => {
           const active = it.exact ? pathname === it.to : pathname.startsWith(it.to);
           const Icon = it.icon;
