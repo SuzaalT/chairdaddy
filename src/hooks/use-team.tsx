@@ -10,6 +10,7 @@ export type Profile = {
   notification_email: string | null;
   anthropic_key: string | null;
   current_team_id: string | null;
+  approval_status: "pending" | "approved" | "rejected";
 };
 
 type TeamCtx = {
