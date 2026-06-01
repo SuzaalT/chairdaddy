@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { LayoutDashboard, Package, CheckCircle2, Receipt, Car, Sparkles } from "lucide-react";
+import { LayoutDashboard, Package, CheckCircle2, Receipt, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const items: { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean }[] = [
@@ -7,7 +7,6 @@ const items: { to: string; label: string; icon: typeof LayoutDashboard; exact?: 
   { to: "/app/inventory", label: "Inventory", icon: Package },
   { to: "/app/sold", label: "Sold", icon: CheckCircle2 },
   { to: "/app/expenses", label: "Expenses", icon: Receipt },
-  { to: "/app/logbook", label: "Logbook", icon: Car },
   { to: "/app/listing-ai", label: "Listing AI", icon: Sparkles },
 ];
 
