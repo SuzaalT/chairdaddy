@@ -23,6 +23,7 @@ import { Route as AppSettingsRouteImport } from './routes/app.settings'
 import { Route as AppLogbookRouteImport } from './routes/app.logbook'
 import { Route as AppListingAiRouteImport } from './routes/app.listing-ai'
 import { Route as AppExpensesRouteImport } from './routes/app.expenses'
+import { Route as AppAdminRouteImport } from './routes/app.admin'
 import { Route as AppActionRequiredRouteImport } from './routes/app.action-required'
 import { Route as AppInventoryIndexRouteImport } from './routes/app.inventory.index'
 import { Route as LovableEmailSuppressionRouteImport } from './routes/lovable/email/suppression'
@@ -104,6 +105,11 @@ const AppExpensesRoute = AppExpensesRouteImport.update({
   path: '/expenses',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAdminRoute = AppAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppActionRequiredRoute = AppActionRequiredRouteImport.update({
   id: '/action-required',
   path: '/action-required',
@@ -166,6 +172,7 @@ export interface FileRoutesByFullPath {
   '/pending': typeof PendingRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/app/action-required': typeof AppActionRequiredRoute
+  '/app/admin': typeof AppAdminRoute
   '/app/expenses': typeof AppExpensesRoute
   '/app/listing-ai': typeof AppListingAiRoute
   '/app/logbook': typeof AppLogbookRoute
@@ -191,6 +198,7 @@ export interface FileRoutesByTo {
   '/pending': typeof PendingRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/app/action-required': typeof AppActionRequiredRoute
+  '/app/admin': typeof AppAdminRoute
   '/app/expenses': typeof AppExpensesRoute
   '/app/listing-ai': typeof AppListingAiRoute
   '/app/logbook': typeof AppLogbookRoute
@@ -218,6 +226,7 @@ export interface FileRoutesById {
   '/pending': typeof PendingRoute
   '/unsubscribe': typeof UnsubscribeRoute
   '/app/action-required': typeof AppActionRequiredRoute
+  '/app/admin': typeof AppAdminRoute
   '/app/expenses': typeof AppExpensesRoute
   '/app/listing-ai': typeof AppListingAiRoute
   '/app/logbook': typeof AppLogbookRoute
@@ -246,6 +255,7 @@ export interface FileRouteTypes {
     | '/pending'
     | '/unsubscribe'
     | '/app/action-required'
+    | '/app/admin'
     | '/app/expenses'
     | '/app/listing-ai'
     | '/app/logbook'
@@ -271,6 +281,7 @@ export interface FileRouteTypes {
     | '/pending'
     | '/unsubscribe'
     | '/app/action-required'
+    | '/app/admin'
     | '/app/expenses'
     | '/app/listing-ai'
     | '/app/logbook'
@@ -297,6 +308,7 @@ export interface FileRouteTypes {
     | '/pending'
     | '/unsubscribe'
     | '/app/action-required'
+    | '/app/admin'
     | '/app/expenses'
     | '/app/listing-ai'
     | '/app/logbook'
@@ -430,6 +442,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppExpensesRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/admin': {
+      id: '/app/admin'
+      path: '/admin'
+      fullPath: '/app/admin'
+      preLoaderRoute: typeof AppAdminRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/action-required': {
       id: '/app/action-required'
       path: '/action-required'
@@ -516,6 +535,7 @@ const AppTeamRouteWithChildren =
 
 interface AppRouteChildren {
   AppActionRequiredRoute: typeof AppActionRequiredRoute
+  AppAdminRoute: typeof AppAdminRoute
   AppExpensesRoute: typeof AppExpensesRoute
   AppListingAiRoute: typeof AppListingAiRoute
   AppLogbookRoute: typeof AppLogbookRoute
@@ -531,6 +551,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppActionRequiredRoute: AppActionRequiredRoute,
+  AppAdminRoute: AppAdminRoute,
   AppExpensesRoute: AppExpensesRoute,
   AppListingAiRoute: AppListingAiRoute,
   AppLogbookRoute: AppLogbookRoute,
@@ -562,3 +583,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
