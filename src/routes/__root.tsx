@@ -54,7 +54,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "theme-color", content: "#3b6ef8" },
       { name: "apple-mobile-web-app-capable", content: "yes" },
       { name: "apple-mobile-web-app-status-bar-style", content: "default" },
-      { name: "apple-mobile-web-app-title", content: "ChairFlip" },
+      { name: "apple-mobile-web-app-title", content: "MarketplaceFlip" },
       { property: "og:title", content: "Marketplace Hunt" },
       { name: "twitter:title", content: "Marketplace Hunt" },
       { property: "og:description", content: "Inventory, expenses, mileage, and AI listings for office chair resellers in Ontario." },
