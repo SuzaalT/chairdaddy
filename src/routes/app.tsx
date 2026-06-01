@@ -18,6 +18,7 @@ function AppLayout() {
     );
   }
   if (!user) return <Navigate to="/login" />;
+  if (profile && profile.approval_status !== "approved") return <Navigate to="/pending" />;
   if (!team) return <Navigate to="/onboarding" />;
 
   const initials = (profile?.full_name || profile?.email || "?")
