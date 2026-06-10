@@ -450,6 +450,14 @@ function NewChair() {
                 placeholder={f.brand ? "Aeron" : "Pick a brand first"}
                 disabled={!f.brand}
               />
+            <Field label="Variant">
+              <SuggestInput
+                value={f.variant}
+                onChange={(v) => setF({ ...f, variant: v })}
+                options={variantOptions}
+                placeholder={f.model ? "Fully Loaded" : "Pick a model first"}
+                disabled={!f.model}
+              />
             </Field>
             <Field label="Source">
               <Select value={f.source} onValueChange={(v) => setF({ ...f, source: v as typeof f.source })}>
