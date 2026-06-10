@@ -1,9 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTeam } from "@/hooks/use-team";
 import { useAuth } from "@/hooks/use-auth";
 import { supabase } from "@/integrations/supabase/client";
 import { generateSku } from "@/lib/sku";
+import { toTitleCase } from "@/lib/text-case";
 import { landedCost, profit, tripDeduction, tripKmTotal, cad, CRA_KM_RATE } from "@/lib/cra";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { SuggestInput } from "@/components/SuggestInput";
 import { toast } from "sonner";
 import { ChevronLeft, Save, MapPin, AlertTriangle, Plus, Minus } from "lucide-react";
 import { estimateDrivingKm, variancePct, VARIANCE_FLAG_PCT } from "@/lib/distance";
@@ -165,6 +167,38 @@ function NewChair() {
       });
   }, [team]);
 
+  // Existing brand/model pairs for case-insensitive autocomplete
+  const [existing, setExisting] = useState<{ brand: string | null; model: string | null }[]>([]);
+  useEffect(() => {
+    if (!team) return;
+    supabase
+      .from("chairs")
+      .select("brand,model")
+      .eq("team_id", team.id)
+      .then(({ data }) => setExisting(data ?? []));
+  }, [team]);
+
+  const brandOptions = useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const r of existing) {
+      const t = toTitleCase(r.brand ?? "");
+      if (t) seen.set(t.toLowerCase(), t);
+    }
+    return Array.from(seen.values()).sort();
+  }, [existing]);
+
+  const modelOptions = useMemo(() => {
+    const target = toTitleCase(f.brand).toLowerCase();
+    if (!target) return [];
+    const seen = new Map<string, string>();
+    for (const r of existing) {
+      if (toTitleCase(r.brand ?? "").toLowerCase() !== target) continue;
+      const t = toTitleCase(r.model ?? "");
+      if (t) seen.set(t.toLowerCase(), t);
+    }
+    return Array.from(seen.values()).sort();
+  }, [existing, f.brand]);
+
   const num = (s: string) => (s === "" ? 0 : Number(s));
   const autoTransport = num(f.trip_km) * (f.trip_round_trip ? 2 : 1) * CRA_KM_RATE;
   const transportCostUsed = f.transport_cost === "" && f.trip_km ? autoTransport : num(f.transport_cost);
@@ -213,15 +247,18 @@ function NewChair() {
       const createdChairs: any[] = [];
       const createdSkus: string[] = [];
 
+      const brandT = toTitleCase(f.brand);
+      const modelT = toTitleCase(f.model) || null;
+
       for (let i = 0; i < quantity; i++) {
-        const sku = await generateSku(team.id, f.brand);
+        const sku = await generateSku(team.id, brandT, modelT);
 
         const insert = {
           team_id: team.id,
           created_by: user.id,
           sku,
-          brand: f.brand,
-          model: f.model || null,
+          brand: brandT,
+          model: modelT,
           source: f.source,
           date_acquired: f.date_acquired,
           storage_unit: f.storage_unit || null,
@@ -381,14 +418,21 @@ function NewChair() {
         {section === "details" && (
           <>
             <Field label="Brand *">
-              <Input
+              <SuggestInput
                 value={f.brand}
-                onChange={(e) => setF({ ...f, brand: e.target.value })}
+                onChange={(v) => setF({ ...f, brand: v })}
+                options={brandOptions}
                 placeholder="Herman Miller"
               />
             </Field>
             <Field label="Model">
-              <Input value={f.model} onChange={(e) => setF({ ...f, model: e.target.value })} placeholder="Aeron" />
+              <SuggestInput
+                value={f.model}
+                onChange={(v) => setF({ ...f, model: v })}
+                options={modelOptions}
+                placeholder={f.brand ? "Aeron" : "Pick a brand first"}
+                disabled={!f.brand}
+              />
             </Field>
             <Field label="Source">
               <Select value={f.source} onValueChange={(v) => setF({ ...f, source: v as typeof f.source })}>

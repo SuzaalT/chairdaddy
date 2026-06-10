@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTeam } from "@/hooks/use-team";
 import { Button } from "@/components/ui/button";
@@ -7,6 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { SuggestInput } from "@/components/SuggestInput";
+import { toTitleCase } from "@/lib/text-case";
 import { ChevronLeft, Save } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -75,6 +77,33 @@ function EditChair() {
     supabase.from("storage_units").select("*").eq("team_id", team.id).then(({ data }) => setUnits(data ?? []));
   }, [team]);
 
+  const [existing, setExisting] = useState<{ brand: string | null; model: string | null }[]>([]);
+  useEffect(() => {
+    if (!team) return;
+    supabase.from("chairs").select("brand,model").eq("team_id", team.id).then(({ data }) => setExisting(data ?? []));
+  }, [team]);
+
+  const brandOptions = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const r of existing) {
+      const t = toTitleCase(r.brand ?? "");
+      if (t) m.set(t.toLowerCase(), t);
+    }
+    return Array.from(m.values()).sort();
+  }, [existing]);
+
+  const modelOptions = useMemo(() => {
+    const target = toTitleCase(f?.brand ?? "").toLowerCase();
+    if (!target) return [];
+    const m = new Map<string, string>();
+    for (const r of existing) {
+      if (toTitleCase(r.brand ?? "").toLowerCase() !== target) continue;
+      const t = toTitleCase(r.model ?? "");
+      if (t) m.set(t.toLowerCase(), t);
+    }
+    return Array.from(m.values()).sort();
+  }, [existing, f?.brand]);
+
   if (isLoading || !f || !chair) return <p className="p-6 text-sm text-muted-foreground">Loading…</p>;
 
   const num = (s: string) => (s === "" ? null : Number(s));
@@ -83,8 +112,8 @@ function EditChair() {
     if (!f.brand) return toast.error("Brand is required");
     setBusy(true);
     const updates = {
-      brand: f.brand,
-      model: f.model || null,
+      brand: toTitleCase(f.brand),
+      model: toTitleCase(f.model) || null,
       source: f.source,
       date_acquired: f.date_acquired,
       storage_unit: f.storage_unit || null,
@@ -132,10 +161,10 @@ function EditChair() {
 
       <div className="px-4 pt-4 space-y-4">
         <Field label="Brand *">
-          <Input value={f.brand} onChange={(e) => setF({ ...f, brand: e.target.value })} />
+          <SuggestInput value={f.brand} onChange={(v) => setF({ ...f, brand: v })} options={brandOptions} placeholder="Herman Miller" />
         </Field>
         <Field label="Model">
-          <Input value={f.model} onChange={(e) => setF({ ...f, model: e.target.value })} />
+          <SuggestInput value={f.model} onChange={(v) => setF({ ...f, model: v })} options={modelOptions} placeholder={f.brand ? "Aeron" : "Pick a brand first"} disabled={!f.brand} />
         </Field>
         <Field label="Source">
           <Select value={f.source} onValueChange={(v) => setF({ ...f, source: v })}>

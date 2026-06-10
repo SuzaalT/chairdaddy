@@ -1,20 +1,27 @@
 import { supabase } from "@/integrations/supabase/client";
+import { brandInitials, toTitleCase } from "./text-case";
 
-export async function generateSku(teamId: string, brand: string, prefix = "CF"): Promise<string> {
-  const yy = String(new Date().getFullYear()).slice(-2);
-  const brandSlug = (brand || "GEN").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6) || "GEN";
-  const root = `${prefix}-${brandSlug}-${yy}-`;
+// SKU format: "<INITIALS> - <Model> <NN>"  (e.g. "HM - Aeron 01")
+// Counter is per team + brand-initials + model.
+export async function generateSku(
+  teamId: string,
+  brand: string,
+  model?: string | null,
+): Promise<string> {
+  const initials = brandInitials(brand);
+  const modelTitle = toTitleCase(model ?? "");
+  const prefix = modelTitle ? `${initials} - ${modelTitle} ` : `${initials} - `;
+
   const { data } = await supabase
     .from("chairs")
     .select("sku")
     .eq("team_id", teamId)
-    .like("sku", `${root}%`)
-    .order("sku", { ascending: false })
-    .limit(1);
-  let n = 1;
-  if (data && data[0]?.sku) {
-    const m = data[0].sku.match(/-(\d{3,})$/);
-    if (m) n = parseInt(m[1], 10) + 1;
+    .like("sku", `${prefix}%`);
+
+  let max = 0;
+  for (const row of data ?? []) {
+    const m = row.sku?.match(/(\d+)\s*$/);
+    if (m) max = Math.max(max, parseInt(m[1], 10));
   }
-  return `${root}${String(n).padStart(3, "0")}`;
+  return `${prefix}${String(max + 1).padStart(2, "0")}`;
 }
