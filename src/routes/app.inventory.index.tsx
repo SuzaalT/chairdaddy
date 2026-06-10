@@ -123,7 +123,7 @@ function Inventory() {
     { id: "listed", label: "Listed" }, { id: "stale", label: "Stale" },
   ];
 
-  const title = model ?? brand ?? "My Stock";
+  const title = variant ?? model ?? brand ?? "My Stock";
   const totalActive = chairs.filter((c) => c.status !== "sold").length;
 
   return (
@@ -131,8 +131,10 @@ function Inventory() {
       <div className="flex items-center justify-between mb-3">
         <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
         <span className="text-xs text-muted-foreground">
-          {model
+          {variant
             ? `${items.length} item${items.length === 1 ? "" : "s"}`
+            : model
+            ? `${variantFolders.length} variant${variantFolders.length === 1 ? "" : "s"}`
             : brand
             ? `${modelFolders.length} model${modelFolders.length === 1 ? "" : "s"}`
             : `${brandFolders.length} brand${brandFolders.length === 1 ? "" : "s"} · ${totalActive} total`}
