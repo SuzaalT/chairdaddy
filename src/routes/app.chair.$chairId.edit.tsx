@@ -129,6 +129,7 @@ function EditChair() {
     const updates = {
       brand: toTitleCase(f.brand),
       model: toTitleCase(f.model) || null,
+      variant: toTitleCase(f.variant) || null,
       source: f.source,
       date_acquired: f.date_acquired,
       storage_unit: f.storage_unit || null,
