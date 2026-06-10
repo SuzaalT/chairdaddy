@@ -167,6 +167,38 @@ function NewChair() {
       });
   }, [team]);
 
+  // Existing brand/model pairs for case-insensitive autocomplete
+  const [existing, setExisting] = useState<{ brand: string | null; model: string | null }[]>([]);
+  useEffect(() => {
+    if (!team) return;
+    supabase
+      .from("chairs")
+      .select("brand,model")
+      .eq("team_id", team.id)
+      .then(({ data }) => setExisting(data ?? []));
+  }, [team]);
+
+  const brandOptions = useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const r of existing) {
+      const t = toTitleCase(r.brand ?? "");
+      if (t) seen.set(t.toLowerCase(), t);
+    }
+    return Array.from(seen.values()).sort();
+  }, [existing]);
+
+  const modelOptions = useMemo(() => {
+    const target = toTitleCase(f.brand).toLowerCase();
+    if (!target) return [];
+    const seen = new Map<string, string>();
+    for (const r of existing) {
+      if (toTitleCase(r.brand ?? "").toLowerCase() !== target) continue;
+      const t = toTitleCase(r.model ?? "");
+      if (t) seen.set(t.toLowerCase(), t);
+    }
+    return Array.from(seen.values()).sort();
+  }, [existing, f.brand]);
+
   const num = (s: string) => (s === "" ? 0 : Number(s));
   const autoTransport = num(f.trip_km) * (f.trip_round_trip ? 2 : 1) * CRA_KM_RATE;
   const transportCostUsed = f.transport_cost === "" && f.trip_km ? autoTransport : num(f.transport_cost);
