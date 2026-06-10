@@ -161,10 +161,10 @@ function EditChair() {
 
       <div className="px-4 pt-4 space-y-4">
         <Field label="Brand *">
-          <Input value={f.brand} onChange={(e) => setF({ ...f, brand: e.target.value })} />
+          <SuggestInput value={f.brand} onChange={(v) => setF({ ...f, brand: v })} options={brandOptions} placeholder="Herman Miller" />
         </Field>
         <Field label="Model">
-          <Input value={f.model} onChange={(e) => setF({ ...f, model: e.target.value })} />
+          <SuggestInput value={f.model} onChange={(v) => setF({ ...f, model: v })} options={modelOptions} placeholder={f.brand ? "Aeron" : "Pick a brand first"} disabled={!f.brand} />
         </Field>
         <Field label="Source">
           <Select value={f.source} onValueChange={(v) => setF({ ...f, source: v })}>
