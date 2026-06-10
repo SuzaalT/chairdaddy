@@ -128,6 +128,7 @@ function NewChair() {
   const [f, setF] = useState({
     brand: "",
     model: "",
+    variant: "",
     source: "fb_marketplace" as "fb_marketplace" | "kijiji" | "supplier" | "estate_sale" | "other",
     date_acquired: new Date().toISOString().slice(0, 10),
     storage_unit: "",
