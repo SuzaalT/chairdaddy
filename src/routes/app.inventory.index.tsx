@@ -161,12 +161,12 @@ function Inventory() {
         ))}
       </div>
 
-      {(brand || model) && (
+      {(brand || model || variant) && (
         <button
-          onClick={() => (model ? setModel(null) : setBrand(null))}
+          onClick={() => (variant ? setVariant(null) : model ? setModel(null) : setBrand(null))}
           className="flex items-center gap-1 text-sm text-muted-foreground mb-3 hover:text-foreground"
         >
-          <ChevronLeft className="h-4 w-4" /> {model ? brand : "All brands"}
+          <ChevronLeft className="h-4 w-4" /> {variant ? model : model ? brand : "All brands"}
         </button>
       )}
 
