@@ -112,8 +112,8 @@ function EditChair() {
     if (!f.brand) return toast.error("Brand is required");
     setBusy(true);
     const updates = {
-      brand: f.brand,
-      model: f.model || null,
+      brand: toTitleCase(f.brand),
+      model: toTitleCase(f.model) || null,
       source: f.source,
       date_acquired: f.date_acquired,
       storage_unit: f.storage_unit || null,
