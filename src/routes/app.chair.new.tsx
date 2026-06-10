@@ -128,6 +128,7 @@ function NewChair() {
   const [f, setF] = useState({
     brand: "",
     model: "",
+    variant: "",
     source: "fb_marketplace" as "fb_marketplace" | "kijiji" | "supplier" | "estate_sale" | "other",
     date_acquired: new Date().toISOString().slice(0, 10),
     storage_unit: "",
@@ -167,15 +168,15 @@ function NewChair() {
       });
   }, [team]);
 
-  // Existing brand/model pairs for case-insensitive autocomplete
-  const [existing, setExisting] = useState<{ brand: string | null; model: string | null }[]>([]);
+  // Existing brand/model/variant tuples for case-insensitive autocomplete
+  const [existing, setExisting] = useState<{ brand: string | null; model: string | null; variant: string | null }[]>([]);
   useEffect(() => {
     if (!team) return;
     supabase
       .from("chairs")
-      .select("brand,model")
+      .select("brand,model,variant")
       .eq("team_id", team.id)
-      .then(({ data }) => setExisting(data ?? []));
+      .then(({ data }) => setExisting((data as any) ?? []));
   }, [team]);
 
   const brandOptions = useMemo(() => {
@@ -198,6 +199,20 @@ function NewChair() {
     }
     return Array.from(seen.values()).sort();
   }, [existing, f.brand]);
+
+  const variantOptions = useMemo(() => {
+    const b = toTitleCase(f.brand).toLowerCase();
+    const m = toTitleCase(f.model).toLowerCase();
+    if (!b || !m) return [];
+    const seen = new Map<string, string>();
+    for (const r of existing) {
+      if (toTitleCase(r.brand ?? "").toLowerCase() !== b) continue;
+      if (toTitleCase(r.model ?? "").toLowerCase() !== m) continue;
+      const t = toTitleCase(r.variant ?? "");
+      if (t) seen.set(t.toLowerCase(), t);
+    }
+    return Array.from(seen.values()).sort();
+  }, [existing, f.brand, f.model]);
 
   const num = (s: string) => (s === "" ? 0 : Number(s));
   const autoTransport = num(f.trip_km) * (f.trip_round_trip ? 2 : 1) * CRA_KM_RATE;
@@ -249,6 +264,7 @@ function NewChair() {
 
       const brandT = toTitleCase(f.brand);
       const modelT = toTitleCase(f.model) || null;
+      const variantT = toTitleCase(f.variant) || null;
 
       for (let i = 0; i < quantity; i++) {
         const sku = await generateSku(team.id, brandT, modelT);
@@ -259,6 +275,7 @@ function NewChair() {
           sku,
           brand: brandT,
           model: modelT,
+          variant: variantT,
           source: f.source,
           date_acquired: f.date_acquired,
           storage_unit: f.storage_unit || null,
@@ -432,6 +449,15 @@ function NewChair() {
                 options={modelOptions}
                 placeholder={f.brand ? "Aeron" : "Pick a brand first"}
                 disabled={!f.brand}
+              />
+            </Field>
+            <Field label="Variant">
+              <SuggestInput
+                value={f.variant}
+                onChange={(v) => setF({ ...f, variant: v })}
+                options={variantOptions}
+                placeholder={f.model ? "Fully Loaded" : "Pick a model first"}
+                disabled={!f.model}
               />
             </Field>
             <Field label="Source">

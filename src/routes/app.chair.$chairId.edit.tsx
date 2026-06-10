@@ -47,6 +47,7 @@ function EditChair() {
       setF({
         brand: chair.brand ?? "",
         model: chair.model ?? "",
+        variant: (chair as any).variant ?? "",
         source: chair.source ?? "fb_marketplace",
         date_acquired: chair.date_acquired ?? "",
         storage_unit: chair.storage_unit ?? "",
@@ -77,10 +78,10 @@ function EditChair() {
     supabase.from("storage_units").select("*").eq("team_id", team.id).then(({ data }) => setUnits(data ?? []));
   }, [team]);
 
-  const [existing, setExisting] = useState<{ brand: string | null; model: string | null }[]>([]);
+  const [existing, setExisting] = useState<{ brand: string | null; model: string | null; variant: string | null }[]>([]);
   useEffect(() => {
     if (!team) return;
-    supabase.from("chairs").select("brand,model").eq("team_id", team.id).then(({ data }) => setExisting(data ?? []));
+    supabase.from("chairs").select("brand,model,variant").eq("team_id", team.id).then(({ data }) => setExisting((data as any) ?? []));
   }, [team]);
 
   const brandOptions = useMemo(() => {
@@ -104,6 +105,20 @@ function EditChair() {
     return Array.from(m.values()).sort();
   }, [existing, f?.brand]);
 
+  const variantOptions = useMemo(() => {
+    const b = toTitleCase(f?.brand ?? "").toLowerCase();
+    const md = toTitleCase(f?.model ?? "").toLowerCase();
+    if (!b || !md) return [];
+    const m = new Map<string, string>();
+    for (const r of existing) {
+      if (toTitleCase(r.brand ?? "").toLowerCase() !== b) continue;
+      if (toTitleCase(r.model ?? "").toLowerCase() !== md) continue;
+      const t = toTitleCase(r.variant ?? "");
+      if (t) m.set(t.toLowerCase(), t);
+    }
+    return Array.from(m.values()).sort();
+  }, [existing, f?.brand, f?.model]);
+
   if (isLoading || !f || !chair) return <p className="p-6 text-sm text-muted-foreground">Loading…</p>;
 
   const num = (s: string) => (s === "" ? null : Number(s));
@@ -114,6 +129,7 @@ function EditChair() {
     const updates = {
       brand: toTitleCase(f.brand),
       model: toTitleCase(f.model) || null,
+      variant: toTitleCase(f.variant) || null,
       source: f.source,
       date_acquired: f.date_acquired,
       storage_unit: f.storage_unit || null,
@@ -165,6 +181,9 @@ function EditChair() {
         </Field>
         <Field label="Model">
           <SuggestInput value={f.model} onChange={(v) => setF({ ...f, model: v })} options={modelOptions} placeholder={f.brand ? "Aeron" : "Pick a brand first"} disabled={!f.brand} />
+        </Field>
+        <Field label="Variant">
+          <SuggestInput value={f.variant} onChange={(v) => setF({ ...f, variant: v })} options={variantOptions} placeholder={f.model ? "Fully Loaded" : "Pick a model first"} disabled={!f.model} />
         </Field>
         <Field label="Source">
           <Select value={f.source} onValueChange={(v) => setF({ ...f, source: v })}>

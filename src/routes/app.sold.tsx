@@ -15,6 +15,7 @@ function SoldItems() {
   const [q, setQ] = useState("");
   const [brand, setBrand] = useState<string | null>(null);
   const [model, setModel] = useState<string | null>(null);
+  const [variant, setVariant] = useState<string | null>(null);
 
   const { data: chairs = [], isLoading } = useQuery({
     queryKey: ["chairs", team?.id],
@@ -41,7 +42,7 @@ function SoldItems() {
       if (c.status !== "sold") return false;
       if (q) {
         const t = q.toLowerCase();
-        const hay = [c.sku, c.brand, c.model, c.notes, c.condition, c.storage_unit, c.buyer_name].filter(Boolean).join(" ").toLowerCase();
+        const hay = [c.sku, c.brand, c.model, (c as any).variant, c.notes, c.condition, c.storage_unit, c.buyer_name].filter(Boolean).join(" ").toLowerCase();
         if (!hay.includes(t)) return false;
       }
       return true;
@@ -68,20 +69,38 @@ function SoldItems() {
     return Object.entries(counts).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
   }, [sold, brand]);
 
-  const items = useMemo(() => {
+  const variantFolders = useMemo(() => {
     if (!brand || !model) return [];
-    return sold.filter((c) => (c.brand || "Unknown") === brand && (c.model || "No model") === model);
+    const scoped = sold.filter((c) => (c.brand || "Unknown") === brand && (c.model || "No model") === model);
+    const counts = scoped.reduce<Record<string, number>>((acc, c) => {
+      const v = (c as any).variant || "No variant";
+      acc[v] = (acc[v] ?? 0) + 1;
+      return acc;
+    }, {});
+    return Object.entries(counts).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
   }, [sold, brand, model]);
 
-  const title = model ?? brand ?? "Sold Items";
+  const items = useMemo(() => {
+    if (!brand || !model || !variant) return [];
+    return sold.filter(
+      (c) =>
+        (c.brand || "Unknown") === brand &&
+        (c.model || "No model") === model &&
+        (((c as any).variant || "No variant") === variant),
+    );
+  }, [sold, brand, model, variant]);
+
+  const title = variant ?? model ?? brand ?? "Sold Items";
 
   return (
     <div className="px-4 pt-4 pb-24">
       <div className="flex items-center justify-between mb-3">
         <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
         <span className="text-xs text-muted-foreground">
-          {model
+          {variant
             ? `${items.length} item${items.length === 1 ? "" : "s"}`
+            : model
+            ? `${variantFolders.length} variant${variantFolders.length === 1 ? "" : "s"}`
             : brand
             ? `${modelFolders.length} model${modelFolders.length === 1 ? "" : "s"}`
             : `${brandFolders.length} brand${brandFolders.length === 1 ? "" : "s"} · ${sold.length} sold`}
@@ -93,12 +112,12 @@ function SoldItems() {
         <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search SKU, brand, buyer…" className="pl-9 h-10" />
       </div>
 
-      {(brand || model) && (
+      {(brand || model || variant) && (
         <button
-          onClick={() => (model ? setModel(null) : setBrand(null))}
+          onClick={() => (variant ? setVariant(null) : model ? setModel(null) : setBrand(null))}
           className="flex items-center gap-1 text-sm text-muted-foreground mb-3 hover:text-foreground"
         >
-          <ChevronLeft className="h-4 w-4" /> {model ? brand : "All brands"}
+          <ChevronLeft className="h-4 w-4" /> {variant ? model : model ? brand : "All brands"}
         </button>
       )}
 
@@ -114,7 +133,7 @@ function SoldItems() {
             {brandFolders.map((b) => (
               <button
                 key={b.name}
-                onClick={() => setBrand(b.name)}
+                onClick={() => { setBrand(b.name); setModel(null); setVariant(null); }}
                 className="flex items-center gap-3 rounded-2xl bg-card border border-border p-4 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-elevated)] transition-shadow text-left"
               >
                 <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary grid place-items-center shrink-0">
@@ -133,7 +152,7 @@ function SoldItems() {
           {modelFolders.map((m) => (
             <button
               key={m.name}
-              onClick={() => setModel(m.name)}
+              onClick={() => { setModel(m.name); setVariant(null); }}
               className="flex items-center gap-3 rounded-2xl bg-card border border-border p-4 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-elevated)] transition-shadow text-left"
             >
               <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary grid place-items-center shrink-0">
@@ -142,6 +161,24 @@ function SoldItems() {
               <div className="min-w-0">
                 <p className="font-semibold truncate">{m.name}</p>
                 <p className="text-xs text-muted-foreground">{m.count} sold</p>
+              </div>
+            </button>
+          ))}
+        </div>
+      ) : !variant ? (
+        <div className="grid grid-cols-2 gap-3">
+          {variantFolders.map((v) => (
+            <button
+              key={v.name}
+              onClick={() => setVariant(v.name)}
+              className="flex items-center gap-3 rounded-2xl bg-card border border-border p-4 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-elevated)] transition-shadow text-left"
+            >
+              <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary grid place-items-center shrink-0">
+                <Folder className="h-5 w-5" />
+              </div>
+              <div className="min-w-0">
+                <p className="font-semibold truncate">{v.name}</p>
+                <p className="text-xs text-muted-foreground">{v.count} sold</p>
               </div>
             </button>
           ))}
