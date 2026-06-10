@@ -47,6 +47,7 @@ function EditChair() {
       setF({
         brand: chair.brand ?? "",
         model: chair.model ?? "",
+        variant: (chair as any).variant ?? "",
         source: chair.source ?? "fb_marketplace",
         date_acquired: chair.date_acquired ?? "",
         storage_unit: chair.storage_unit ?? "",
