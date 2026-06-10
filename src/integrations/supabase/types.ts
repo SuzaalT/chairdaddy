@@ -51,6 +51,7 @@ export type Database = {
           trip_round_trip: boolean | null
           trip_start: string | null
           updated_at: string
+          variant: string | null
           work_done: string | null
         }
         Insert: {
@@ -89,6 +90,7 @@ export type Database = {
           trip_round_trip?: boolean | null
           trip_start?: string | null
           updated_at?: string
+          variant?: string | null
           work_done?: string | null
         }
         Update: {
@@ -127,6 +129,7 @@ export type Database = {
           trip_round_trip?: boolean | null
           trip_start?: string | null
           updated_at?: string
+          variant?: string | null
           work_done?: string | null
         }
         Relationships: [
