@@ -89,10 +89,26 @@ function Inventory() {
     return Object.entries(counts).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
   }, [baseFiltered, brand]);
 
-  const items = useMemo(() => {
+  const variantFolders = useMemo(() => {
     if (!brand || !model) return [];
-    return baseFiltered.filter((c) => (c.brand || "Unknown") === brand && (c.model || "No model") === model);
+    const scoped = baseFiltered.filter((c) => (c.brand || "Unknown") === brand && (c.model || "No model") === model);
+    const counts = scoped.reduce<Record<string, number>>((acc, c) => {
+      const v = (c as any).variant || "No variant";
+      acc[v] = (acc[v] ?? 0) + 1;
+      return acc;
+    }, {});
+    return Object.entries(counts).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count);
   }, [baseFiltered, brand, model]);
+
+  const items = useMemo(() => {
+    if (!brand || !model || !variant) return [];
+    return baseFiltered.filter(
+      (c) =>
+        (c.brand || "Unknown") === brand &&
+        (c.model || "No model") === model &&
+        (((c as any).variant || "No variant") === variant),
+    );
+  }, [baseFiltered, brand, model, variant]);
 
   async function doDelete() {
     if (!pendingDelete) return;
