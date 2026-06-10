@@ -264,6 +264,7 @@ function NewChair() {
 
       const brandT = toTitleCase(f.brand);
       const modelT = toTitleCase(f.model) || null;
+      const variantT = toTitleCase(f.variant) || null;
 
       for (let i = 0; i < quantity; i++) {
         const sku = await generateSku(team.id, brandT, modelT);
@@ -274,6 +275,7 @@ function NewChair() {
           sku,
           brand: brandT,
           model: modelT,
+          variant: variantT,
           source: f.source,
           date_acquired: f.date_acquired,
           storage_unit: f.storage_unit || null,
