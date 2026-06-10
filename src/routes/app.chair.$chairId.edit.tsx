@@ -77,6 +77,33 @@ function EditChair() {
     supabase.from("storage_units").select("*").eq("team_id", team.id).then(({ data }) => setUnits(data ?? []));
   }, [team]);
 
+  const [existing, setExisting] = useState<{ brand: string | null; model: string | null }[]>([]);
+  useEffect(() => {
+    if (!team) return;
+    supabase.from("chairs").select("brand,model").eq("team_id", team.id).then(({ data }) => setExisting(data ?? []));
+  }, [team]);
+
+  const brandOptions = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const r of existing) {
+      const t = toTitleCase(r.brand ?? "");
+      if (t) m.set(t.toLowerCase(), t);
+    }
+    return Array.from(m.values()).sort();
+  }, [existing]);
+
+  const modelOptions = useMemo(() => {
+    const target = toTitleCase(f?.brand ?? "").toLowerCase();
+    if (!target) return [];
+    const m = new Map<string, string>();
+    for (const r of existing) {
+      if (toTitleCase(r.brand ?? "").toLowerCase() !== target) continue;
+      const t = toTitleCase(r.model ?? "");
+      if (t) m.set(t.toLowerCase(), t);
+    }
+    return Array.from(m.values()).sort();
+  }, [existing, f?.brand]);
+
   if (isLoading || !f || !chair) return <p className="p-6 text-sm text-muted-foreground">Loading…</p>;
 
   const num = (s: string) => (s === "" ? null : Number(s));
