@@ -185,7 +185,7 @@ function Inventory() {
             {brandFolders.map((b) => (
               <button
                 key={b.name}
-                onClick={() => setBrand(b.name)}
+                onClick={() => { setBrand(b.name); setModel(null); setVariant(null); }}
                 className="flex items-center gap-3 rounded-2xl bg-card border border-border p-4 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-elevated)] transition-shadow text-left"
               >
                 <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary grid place-items-center shrink-0">
@@ -207,7 +207,7 @@ function Inventory() {
             {modelFolders.map((m) => (
               <button
                 key={m.name}
-                onClick={() => setModel(m.name)}
+                onClick={() => { setModel(m.name); setVariant(null); }}
                 className="flex items-center gap-3 rounded-2xl bg-card border border-border p-4 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-elevated)] transition-shadow text-left"
               >
                 <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary grid place-items-center shrink-0">
@@ -216,6 +216,28 @@ function Inventory() {
                 <div className="min-w-0">
                   <p className="font-semibold truncate">{m.name}</p>
                   <p className="text-xs text-muted-foreground">{m.count} item{m.count === 1 ? "" : "s"}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        )
+      ) : !variant ? (
+        variantFolders.length === 0 ? (
+          <div className="text-center py-16"><p className="text-muted-foreground text-sm">No variants match.</p></div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3">
+            {variantFolders.map((v) => (
+              <button
+                key={v.name}
+                onClick={() => setVariant(v.name)}
+                className="flex items-center gap-3 rounded-2xl bg-card border border-border p-4 shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-elevated)] transition-shadow text-left"
+              >
+                <div className="h-10 w-10 rounded-xl bg-primary/10 text-primary grid place-items-center shrink-0">
+                  <Folder className="h-5 w-5" />
+                </div>
+                <div className="min-w-0">
+                  <p className="font-semibold truncate">{v.name}</p>
+                  <p className="text-xs text-muted-foreground">{v.count} item{v.count === 1 ? "" : "s"}</p>
                 </div>
               </button>
             ))}
