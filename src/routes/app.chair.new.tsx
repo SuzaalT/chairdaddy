@@ -450,6 +450,7 @@ function NewChair() {
                 placeholder={f.brand ? "Aeron" : "Pick a brand first"}
                 disabled={!f.brand}
               />
+            </Field>
             <Field label="Variant">
               <SuggestInput
                 value={f.variant}
