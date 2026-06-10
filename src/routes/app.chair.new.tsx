@@ -247,15 +247,18 @@ function NewChair() {
       const createdChairs: any[] = [];
       const createdSkus: string[] = [];
 
+      const brandT = toTitleCase(f.brand);
+      const modelT = toTitleCase(f.model) || null;
+
       for (let i = 0; i < quantity; i++) {
-        const sku = await generateSku(team.id, f.brand);
+        const sku = await generateSku(team.id, brandT, modelT);
 
         const insert = {
           team_id: team.id,
           created_by: user.id,
           sku,
-          brand: f.brand,
-          model: f.model || null,
+          brand: brandT,
+          model: modelT,
           source: f.source,
           date_acquired: f.date_acquired,
           storage_unit: f.storage_unit || null,
