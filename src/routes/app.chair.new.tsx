@@ -418,14 +418,21 @@ function NewChair() {
         {section === "details" && (
           <>
             <Field label="Brand *">
-              <Input
+              <SuggestInput
                 value={f.brand}
-                onChange={(e) => setF({ ...f, brand: e.target.value })}
+                onChange={(v) => setF({ ...f, brand: v })}
+                options={brandOptions}
                 placeholder="Herman Miller"
               />
             </Field>
             <Field label="Model">
-              <Input value={f.model} onChange={(e) => setF({ ...f, model: e.target.value })} placeholder="Aeron" />
+              <SuggestInput
+                value={f.model}
+                onChange={(v) => setF({ ...f, model: v })}
+                options={modelOptions}
+                placeholder={f.brand ? "Aeron" : "Pick a brand first"}
+                disabled={!f.brand}
+              />
             </Field>
             <Field label="Source">
               <Select value={f.source} onValueChange={(v) => setF({ ...f, source: v as typeof f.source })}>
