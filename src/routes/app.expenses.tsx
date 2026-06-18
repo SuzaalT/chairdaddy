@@ -11,9 +11,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { Camera, Loader2, Plus, Receipt, Sparkles, Pencil, Trash2 } from "lucide-react";
+import { Camera, Loader2, Plus, Receipt, Sparkles, Pencil, Trash2, CheckSquare } from "lucide-react";
 import { toast } from "sonner";
 import { callAnthropic, fileToBase64 } from "@/lib/anthropic";
+import { useMultiSelect, useLongPress } from "@/hooks/use-multi-select";
+import { SelectionBar } from "@/components/SelectionBar";
+import { Checkbox } from "@/components/ui/checkbox";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/app/expenses")({ component: Expenses });
 
@@ -38,6 +42,8 @@ function Expenses() {
   const [scanning, setScanning] = useState(false);
   const [f, setF] = useState<FormState>(emptyForm());
   const [pendingDelete, setPendingDelete] = useState<{ id: string; label: string } | null>(null);
+  const sel = useMultiSelect();
+  const [pendingBulk, setPendingBulk] = useState(false);
 
   const { data: expenses = [] } = useQuery({
     queryKey: ["expenses", team?.id],
@@ -134,6 +140,17 @@ function Expenses() {
     if (error) toast.error(error.message);
     else { toast.success("Deleted"); qc.invalidateQueries({ queryKey: ["expenses", team?.id] }); }
     setPendingDelete(null);
+  }
+
+  async function doBulkDelete() {
+    const ids = Array.from(sel.selected);
+    if (!ids.length) return;
+    const { error } = await supabase.from("expenses").delete().in("id", ids);
+    setPendingBulk(false);
+    if (error) return toast.error(error.message);
+    toast.success(`${ids.length} item${ids.length === 1 ? "" : "s"} deleted`);
+    sel.exit();
+    qc.invalidateQueries({ queryKey: ["expenses", team?.id] });
   }
 
   return (
