@@ -8,11 +8,14 @@ import { SwipeToDelete } from "@/components/SwipeToDelete";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { ListChairSheet } from "@/components/ListChairSheet";
 import { Input } from "@/components/ui/input";
-import { Plus, Search, Sparkles, Folder, ChevronLeft } from "lucide-react";
+import { Plus, Search, Sparkles, Folder, ChevronLeft, CheckSquare } from "lucide-react";
 import { daysBetween, STALE_DAYS } from "@/lib/cra";
 import { cn } from "@/lib/utils";
 import { usePermission, PERMISSIONS } from "@/hooks/use-permission";
 import { toast } from "sonner";
+import { useMultiSelect, useLongPress } from "@/hooks/use-multi-select";
+import { SelectionBar } from "@/components/SelectionBar";
+import { Checkbox } from "@/components/ui/checkbox";
 import type { Database } from "@/integrations/supabase/types";
 
 type Chair = Database["public"]["Tables"]["chairs"]["Row"];
@@ -32,6 +35,8 @@ function Inventory() {
   const [variant, setVariant] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<{ id: string; label: string } | null>(null);
   const [listChair, setListChair] = useState<Chair | null>(null);
+  const sel = useMultiSelect();
+  const [pendingBulk, setPendingBulk] = useState(false);
 
   const { data: chairs = [], isLoading } = useQuery({
     queryKey: ["chairs", team?.id],
@@ -116,6 +121,17 @@ function Inventory() {
     if (error) toast.error(error.message);
     else { toast.success("Deleted"); qc.invalidateQueries({ queryKey: ["chairs", team?.id] }); }
     setPendingDelete(null);
+  }
+
+  async function doBulkDelete() {
+    const ids = Array.from(sel.selected);
+    if (!ids.length) return;
+    const { error } = await supabase.from("chairs").delete().in("id", ids);
+    setPendingBulk(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(`${ids.length} item${ids.length === 1 ? "" : "s"} deleted`);
+    sel.exit();
+    qc.invalidateQueries({ queryKey: ["chairs", team?.id] });
   }
 
   const filters: { id: Filter; label: string }[] = [
