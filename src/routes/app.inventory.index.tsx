@@ -142,19 +142,30 @@ function Inventory() {
   const title = variant ?? model ?? brand ?? "My Stock";
   const totalActive = chairs.filter((c) => c.status !== "sold").length;
 
+  const canSelect = !!(canDelete && brand && model && variant && items.length > 0);
+
   return (
     <div className="px-4 pt-4 pb-24">
       <div className="flex items-center justify-between mb-3">
         <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-        <span className="text-xs text-muted-foreground">
-          {variant
-            ? `${items.length} item${items.length === 1 ? "" : "s"}`
-            : model
-            ? `${variantFolders.length} variant${variantFolders.length === 1 ? "" : "s"}`
-            : brand
-            ? `${modelFolders.length} model${modelFolders.length === 1 ? "" : "s"}`
-            : `${brandFolders.length} brand${brandFolders.length === 1 ? "" : "s"} · ${totalActive} total`}
-        </span>
+        <div className="flex items-center gap-3">
+          {sel.active ? (
+            <button onClick={sel.exit} className="text-sm font-medium text-muted-foreground">Cancel</button>
+          ) : canSelect ? (
+            <button onClick={() => sel.enter()} className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-foreground">
+              <CheckSquare className="h-4 w-4" /> Select
+            </button>
+          ) : null}
+          <span className="text-xs text-muted-foreground">
+            {variant
+              ? `${items.length} item${items.length === 1 ? "" : "s"}`
+              : model
+              ? `${variantFolders.length} variant${variantFolders.length === 1 ? "" : "s"}`
+              : brand
+              ? `${modelFolders.length} model${modelFolders.length === 1 ? "" : "s"}`
+              : `${brandFolders.length} brand${brandFolders.length === 1 ? "" : "s"} · ${totalActive} total`}
+          </span>
+        </div>
       </div>
 
       <div className="relative mb-3">
@@ -268,25 +279,31 @@ function Inventory() {
           {items.map((c) => {
             const needsListing = c.status === "in_stock" && !c.date_listed;
             return (
-              <div key={c.id} className="relative">
-                <SwipeToDelete
-                  disabled={!canDelete}
-                  onDelete={() => setPendingDelete({ id: c.id, label: `${c.brand}${c.model ? " · " + c.model : ""}` })}
-                >
-                  <ChairCard chair={c} draggable={canDelete} />
-                </SwipeToDelete>
-                {needsListing && (
-                  <button
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); setListChair(c); }}
-                    className="absolute top-3 right-3 z-10 inline-flex items-center gap-1 rounded-full bg-[oklch(0.95_0.08_75)] text-[oklch(0.4_0.16_60)] border border-[oklch(0.85_0.12_75)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide shadow-sm hover:brightness-95"
-                  >
-                    <Sparkles className="h-3 w-3" /> Needs listing
-                  </button>
-                )}
-              </div>
+              <ChairSelectableRow
+                key={c.id}
+                chair={c}
+                canDelete={canDelete}
+                selectionActive={sel.active}
+                selected={sel.selected.has(c.id)}
+                onLongPress={() => canDelete && sel.enter(c.id)}
+                onToggle={() => sel.toggle(c.id)}
+                onSwipeDelete={() => setPendingDelete({ id: c.id, label: `${c.brand}${c.model ? " · " + c.model : ""}` })}
+                needsListing={needsListing}
+                onListClick={() => setListChair(c)}
+              />
             );
           })}
         </div>
+      )}
+
+      {sel.active && (
+        <SelectionBar
+          count={sel.selected.size}
+          total={items.length}
+          allSelected={sel.selected.size === items.length}
+          onToggleAll={(on) => sel.setAll(items.map((c) => c.id), on)}
+          onDelete={() => setPendingBulk(true)}
+        />
       )}
 
       <ConfirmDialog
@@ -297,11 +314,64 @@ function Inventory() {
         onConfirm={doDelete}
       />
 
-      <Link to="/app/chair/new" className="fixed bottom-24 right-4 z-30 h-14 w-14 rounded-full bg-primary text-primary-foreground grid place-items-center shadow-[var(--shadow-elevated)] hover:scale-105 transition-transform" aria-label="Add chair">
-        <Plus className="h-6 w-6" />
-      </Link>
+      <ConfirmDialog
+        open={pendingBulk}
+        onOpenChange={setPendingBulk}
+        title={`Delete ${sel.selected.size} item${sel.selected.size === 1 ? "" : "s"}?`}
+        description="This cannot be undone."
+        onConfirm={doBulkDelete}
+      />
+
+      {!sel.active && (
+        <Link to="/app/chair/new" className="fixed bottom-24 right-4 z-30 h-14 w-14 rounded-full bg-primary text-primary-foreground grid place-items-center shadow-[var(--shadow-elevated)] hover:scale-105 transition-transform" aria-label="Add chair">
+          <Plus className="h-6 w-6" />
+        </Link>
+      )}
 
       <ListChairSheet chair={listChair} open={!!listChair} onOpenChange={(v) => !v && setListChair(null)} />
+    </div>
+  );
+}
+
+function ChairSelectableRow({
+  chair, canDelete, selectionActive, selected,
+  onLongPress, onToggle, onSwipeDelete, needsListing, onListClick,
+}: {
+  chair: Chair; canDelete: boolean; selectionActive: boolean; selected: boolean;
+  onLongPress: () => void; onToggle: () => void; onSwipeDelete: () => void;
+  needsListing: boolean; onListClick: () => void;
+}) {
+  const lp = useLongPress(onLongPress);
+  if (selectionActive) {
+    return (
+      <div
+        onClick={onToggle}
+        className={cn(
+          "flex items-center gap-3 rounded-2xl border p-2 pr-3 cursor-pointer transition-colors select-none",
+          selected ? "bg-primary/5 border-primary/40" : "bg-card border-border"
+        )}
+      >
+        <Checkbox checked={selected} onCheckedChange={onToggle} onClick={(e) => e.stopPropagation()} className="h-5 w-5 rounded-full ml-1" />
+        <div className="flex-1 min-w-0 pointer-events-none">
+          <p className="text-[11px] font-mono text-muted-foreground tracking-wider">{chair.sku}</p>
+          <p className="font-semibold truncate">{chair.brand}{chair.model ? ` · ${chair.model}` : ""}</p>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="relative" {...lp.handlers}>
+      <SwipeToDelete disabled={!canDelete} onDelete={onSwipeDelete}>
+        <ChairCard chair={chair} draggable={canDelete} />
+      </SwipeToDelete>
+      {needsListing && (
+        <button
+          onClick={(e) => { e.preventDefault(); e.stopPropagation(); onListClick(); }}
+          className="absolute top-3 right-3 z-10 inline-flex items-center gap-1 rounded-full bg-[oklch(0.95_0.08_75)] text-[oklch(0.4_0.16_60)] border border-[oklch(0.85_0.12_75)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide shadow-sm hover:brightness-95"
+        >
+          <Sparkles className="h-3 w-3" /> Needs listing
+        </button>
+      )}
     </div>
   );
 }
