@@ -147,7 +147,7 @@ function Expenses() {
     if (!ids.length) return;
     const { error } = await supabase.from("expenses").delete().in("id", ids);
     setPendingBulk(false);
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success(`${ids.length} item${ids.length === 1 ? "" : "s"} deleted`);
     sel.exit();
     qc.invalidateQueries({ queryKey: ["expenses", team?.id] });
